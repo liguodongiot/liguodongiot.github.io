@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Scala高阶函数</title>
+
+<xmp theme="united" style="display:none;">
+在函数式编程语言中，函数是“头等公民”，可以像任何其他数据类型一样被传递和操作。 
+因为Scala混合了面向对象和函数式的特性，所以对Scala来说，函数是“头等公民”。
+
+###作为值的函数
+
+在Scala中，无法直接操纵方法，只能直接操纵函数，所以需要使用`_`。
+
+```Scala
+import scala.math._
+
+val temp = ceil _
+val num = 3.14
+println("fun:"+temp(num))   //4.0
+```
+temp的类型是(Double)=>Double，意为接受Double参数并返回Double的函数。能够对fun做的有：调用，传递。
+
+```Scala
+val fun = Math.ceil _ //向上取整
+
+//函数作为参数
+Array(3.14, 1.42, 2.0).map(fun).foreach(println) //4.0 2.0 2.0 
+Array(3.14, 1.42, 2.0).map(fun).foreach(x => print(x+" "))
+```
+###匿名函数
+
+函数不一定需要名称，可以将匿名函数赋值给变量，也可以当参数传递。
+
+```Scala
+val triple = (x: Double) => 3 * x
+Array(3.14, 1.42, 2.0).map( (x: Double) => 3 * x).foreach(x => print(x+" "))        //9.42 4.26 6.0 
+println("\n------")
+Array(3.14, 1.42, 2.0).map{ (x: Double) => 3 * x }.foreach(x => print(x+" "))
+println("\n------")     //9.42 4.26 6.0 
+```
+###高阶函数
+
+接受函数参数或者是返回函数的函数，被称为高阶函数（higher-order function）。
+```Scala
+实现一个接受另一个函数为参数的函数:
+def high_order_functions( f :(Double) => Double ) = f(0.25)
+
+该函数的类型是：( (Double) => Double ) => Double
+
+println(high_order_functions(Math.ceil _))  //1.0
+
+println(high_order_functions(Math.sqrt _))  //0.5
+
+返回一个函数的函数:
+
+//mulBy可以产出任何两个数相乘的函数
+def mulBy(factor : Double) = (x: Double)=> factor * x
+
+val quintuple = mulBy(5)    //返回值：(x: Double) => 5 * x
+
+println(quintuple(20))      //5 * 20
+```
+
+###参数（类型）推断
+
+前面有定义高阶函数def valueAtOneQuarter(f: (Double) => Double) = f(0.25)， 
+因为已知参数的类型，所以Scala会尽可能推断出类型，在传入参数时，可以省掉一些内容。
+```Scala
+println( high_order_functions( (x: Double) => 3*x) ) //0.75
+
+high_order_functions((x) => 3*x) //已知参数类型，可以省掉Double
+high_order_functions(x => 3*x)  //只有一个参数时，可以省去()
+high_order_functions( 3 * _ )   //参数只在右侧出现一次，可以用_(占位符)替换
+```
+
+
+</xmp>
+
+
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
