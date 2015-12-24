@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Ubuntu常用软件安装及解决情况</title>
+
+<xmp theme="united" style="display:none;">
+###**解决iNodeClient校园网安装双击不能运行问题**
+拷贝 libtiff.so.4.3.2，libtiff.so.4，libtiffjpeg.so.62 三个库文件到/usr/lib文件夹下。然后双击运行软件。
+
+
+
+###**命令行安装flash**
+```
+sudo apt-get update
+sudo apt-get install flashplugin-installer
+```
+
+###**命令行安装forefox**
+```
+sudo apt-get update
+sudo apt-get install firefox
+```
+
+###**命令行安装vim**
+```
+sudo apt-get update
+sudo apt-get install vim
+```
+
+配置vim编辑器
+终端切到在主目录下（cd ~）
+执行命令 vim .vimrc打开或创建vim的配置文件
+加入自己的配置方案
+例如：
+`set nu`     "是显示行号
+`set showmatch`    "显示括号匹配等
+
+
+###**jd-gui    反编译java源码**
+下载`jd-gui-0.3.3.linux.i686.tar.gz`
+执行`tar  -xzvf  jd-gui-0.3.3.linux.i686.tar.gz`
+```
+sudo  mv  jd-gui  /usr/local/bin
+```
+就可以运行了，只需将.class文件拖拽到jd-gui中
+
+###**MySQL安装**
+```
+sudo apt-get install mysql-server
+```
+
+登录：`mysql -uroot -p`
+
+####**常用操作**
+```
+//想myuser使用mypassword从任何主机连接到mysql服务器
+mysql> grant all privileges on *.* to myuser@'%' identified by mypassword with grant option; 
+//创建用户
+mysql> create user 'hadoop' identified by 'hadoop'; 
+//授权
+mysql> grant all on *.* to hadoop@'%' with grant option; 
+mysql> quit;
+[root@hadoop9 hadoop]# mysql -uhadoop -p 
+mysql> create database hive; 
+mysql> quit;
+```
+
+</xmp>
+
+
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
