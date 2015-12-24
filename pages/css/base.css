@@ -25,6 +25,7 @@ nav { background: rgba(0,0,0,0.8); height: 48px; line-height: 48px; padding-left
 nav a { display: inline-block; font-size: 18px; font-family: "Microsoft Yahei", Arial, Helvetica, sans-serif; color: #FFF; padding: 0 20px; -webkit-transition: all 1s; -moz-transition: all 1s; -o-transition: all 1s; transition: all 1s; }
 nav a:hover { background: #e41635; }
 #topnav_current { background: #e41635 }/* 高亮选中颜色 */
+#yellow_topnav_current { background: #FF00FF }
 article { width: 73%; float: left; background: url(../images/ibodybg.png) 560px -147px no-repeat; }/* 左侧栏 */
 aside { width: 27%; background: url(../images/ibodybg.png) -170px -147px no-repeat #000; float: right; }/* 右侧栏 */
 /* 版权信息 */
