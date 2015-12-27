@@ -76,3 +76,21 @@ ul.infos p img { display: block; margin: auto }
 .template li span { color: #fff; display: block; text-align: center; margin-top: 5px; width: 142px; overflow: hidden; text-overflow: ellipsis; height: 14px }
 .template li:hover { background: #666; padding: 5px 5px 6px 5px; }
 a.more { position: absolute; right: 0; top: 4px; color: #666; font-size: 12px }
+
+.templatewid { margin: 0 10px 0 10px; }
+.templatewid h3 { border-bottom: #333 2px solid; width: 100%; overflow: hidden; font-size: 14px; font-family: "Î¢ÈíÑÅºÚ"; display: block; clear: both; margin-bottom: 10px; position: relative }
+.templatewid h3 p { background: #474645; width: 180px; height: 25px; line-height: 25px; color: #fff; text-align: center; box-shadow: #999 4px 5px 1px; }
+.templatewid h3 p span { color: #38b3d4; }
+.templatewid ul li { margin: 3px; float: left; display: block; padding: 5px 5px 6px 5px; -webkit-transition: all 1s; -moz-transition: all 1s; -o-transition: all 1s; transition: all 1s; }
+.templatewid li img { width: 650px; height: 400px; background: #FFF; padding: 4px; box-shadow: 0px 0px 2px rgba(0,0,0,.5); display: block; }
+.templatewid li span { color: #fff; display: block; text-align: center; margin-top: 5px; width: 142px; overflow: hidden; text-overflow: ellipsis; height: 14px }
+.templatewid li:hover { background: #666; padding: 5px 5px 6px 5px; }
+
+.templatehei { margin: 0 10px 0 10px; }
+.templatehei h3 { border-bottom: #333 2px solid; width: 100%; overflow: hidden; font-size: 14px; font-family: "Î¢ÈíÑÅºÚ"; display: block; clear: both; margin-bottom: 10px; position: relative }
+.templatehei h3 p { background: #474645; width: 180px; height: 25px; line-height: 25px; color: #fff; text-align: center; box-shadow: #999 4px 5px 1px; }
+.templatehei h3 p span { color: #38b3d4; }
+.templatehei ul li { margin: 3px; float: left; display: block; padding: 5px 5px 6px 5px; -webkit-transition: all 1s; -moz-transition: all 1s; -o-transition: all 1s; transition: all 1s; }
+.templatehei li img { width: 200px; height: 300px; background: #FFF; padding: 4px; box-shadow: 0px 0px 2px rgba(0,0,0,.5); display: block; }
+.templatehei li span { color: #fff; display: block; text-align: center; margin-top: 5px; width: 142px; overflow: hidden; text-overflow: ellipsis; height: 14px }
+.templatehei li:hover { background: #666; padding: 5px 5px 6px 5px; }
