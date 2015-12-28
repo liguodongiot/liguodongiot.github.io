@@ -1,6 +1,6 @@
 @charset "gb2312";
 /* CSS Document */
-.banner { background: url(../images/banner.jpg) no-repeat center; height: 290px; margin: 10px auto; width: 100%; font-size: 16px; font-family: "Microsoft Yahei", Arial, Helvetica, sans-serif; }
+.banner { background: url(../images/main2.jpg) no-repeat center; height: 290px; margin: 10px auto; width: 100%; font-size: 16px; font-family: "Microsoft Yahei", Arial, Helvetica, sans-serif; }
 .texts { line-height: 36px; padding: 90px 0 0 40px; text-shadow: 1px 1px rgba(255,255,255,0.3); }
 .texts p { -webkit-transition: all 1s; -moz-transition: all 1s; -o-transition: all 1s; transition: all 1s; -webkit-transform: translate(60px); -moz-transform: translate(60px); -o-transform: translate(60px); -ms-transform: translate(60px); transform: translate(60px); }
 .texts p:hover { padding-left: 20px }
