@@ -1,0 +1,7 @@
+@charset "gb2312";
+.bloglist {  overflow: hidden; border-right:#5EA51B 3px solid }
+.arrow_box { background: #f8f8f8; box-shadow: 0px 1px 0px rgba(255,255,255,.1), inset 0px 1px 1px rgba(214, 214, 214, 0.7); width: 100%; border-radius: 6px; padding: 20px 0; margin: 20px 0; overflow:hidden }
+.arrow_box img { width: 150px; float: left; margin: 0 20px 0 20px; }
+.arrow_box p { line-height: 24px; padding: 0 20px 20px }
+.sy{ overflow:hidden}
+.dateview2 {background: #5EA51B; border-radius: 0px 40px; text-align: center; color: #fff ; float:right; padding:10px}
