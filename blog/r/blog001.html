@@ -2,9 +2,9 @@
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<title>常用工具的快捷键</title>
+<title>R语言基本语法</title>
 
-<xmp theme="chaitin" toc="true" style="display:none;">
+<xmp theme="Cerulean" style="display:none;">
 ###**RStudio快捷键**
 Ctrl + L			清除控制台输出
 
@@ -14,62 +14,173 @@ Ctrl + Shift + S	运行当前脚本文件
 
 Ctrl + D			删除整行
 
----
 
-###**命令行安装flash**
-```
-sudo apt-get update
-sudo apt-get install flashplugin-installer
-```
-
-###**命令行安装forefox**
-```
-sudo apt-get update
-sudo apt-get install firefox
-```
-
-###**命令行安装vim**
-```
-sudo apt-get update
-sudo apt-get install vim
-```
-
-配置vim编辑器
-终端切到在主目录下（cd ~）
-执行命令 vim .vimrc打开或创建vim的配置文件
-加入自己的配置方案
-例如：
-`set nu`     "是显示行号
-`set showmatch`    "显示括号匹配等
+###变量赋值
 
 
-###**jd-gui    反编译java源码**
-下载`jd-gui-0.3.3.linux.i686.tar.gz`
-执行`tar  -xzvf  jd-gui-0.3.3.linux.i686.tar.gz`
-```
-sudo  mv  jd-gui  /usr/local/bin
-```
-就可以运行了，只需将.class文件拖拽到jd-gui中
+```r
+#通过赋值生成一个新变量
+x  <- 1.5; print(x)
 
-###**MySQL安装**
-```
-sudo apt-get install mysql-server
+y1 <- c(1.5,2.3,8.6,7.4,9.2); println(y1)
+
+y2 <- c("MSFT","GOOG","AAPL"); print(y2)
+
+y3 <- c(T,F,T,T,F,F); print(y3)
+
+3.1415926 -> z; print(z)  #数据在左，变量名在右赋值，但比较少用
+
+assign("t",1.414); print(t)  #assign()函数给变量赋值
+
+szSymbolName < - 'GSPC'  #assign()函数的有趣用途：将数值赋值给保存在字符串变量中的变量名
+
+assign(szSymbolName,1860); print(GSPC) #1860
+
+
+#可一次输入多个数据
+#后面两个参数分别是换行符和分隔符
+cat("x = ",x, "\n",sep="")
+
+#显示当前内存中的所有变量、函数名称
+ls()
+
+#删除内存中的指定名称变量
+rm(GSPC)
+
+#删除内存中加载的所有变量和函数，慎用
+rm(list=ls())
+
 ```
 
-登录：`mysql -uroot -p`
 
-####**常用操作**
+
+
+###分支结构
+```r
+a <- 1
+if(a==1) print("a==1")
+
+a <- 2
+if(a>1) print("a > 1") | else print("a <= 1")
+
+a <- 3
+if(a==1){
+	print("a == 1")
+}else 		#注意：这里else必须紧跟在上一个大括号后面
+{
+	print("a != 1" )
+}
+
+#多重分支结构，同样每个else必须和前面的 } 紧紧连在一起
+a <- 4
+if( a == 1){
+	print("a == 1")
+}else if(a == 2){
+	print("a == 2")
+}else{
+	print("Not 1 & 2")
+}
+
+# ifelse()计算第一个逻辑表达式得到结果如果为T，则返回第二个参数，否则返回第三个参数
+a <- 2
+print( ifelse(a>1,3.2416,1.414))
+
+#switch语句的多重分支结构
+n <- 2
+switch(n,
+	print("德玛西亚"),
+    print("探险家"),
+    print("多兰之剑"),
+    print("狂徒铠甲"),
+    print("提莫")
+)
+#结果是：探险家
+
 ```
-//想myuser使用mypassword从任何主机连接到mysql服务器
-mysql> grant all privileges on *.* to myuser@'%' identified by mypassword with grant option; 
-//创建用户
-mysql> create user 'hadoop' identified by 'hadoop'; 
-//授权
-mysql> grant all on *.* to hadoop@'%' with grant option; 
-mysql> quit;
-[root@hadoop9 hadoop]# mysql -uhadoop -p 
-mysql> create database hive; 
-mysql> quit;
+
+
+###循环结构
+```r
+#for循环
+iTotal <- 0
+for(i in 1:100){
+	iTotal <- iTotal +i
+}
+cat("1-100的累加和为：",iTotal,"\n",sep="")
+
+#字符串也同样可以成功枚举，十分方便
+szSymbols <- c("MSFT","GOOG","AAPL","INTL","ORCL","SYMC")
+for(SymbolName in szSymbols){
+	cat(SymbolName,"\n",sep="")
+}
+
+# while循环
+i <- 1
+iTotal <- 0
+while(i<=100){
+	iTotal <- iTotal +i
+    i <- i+1
+}
+cat("1-100的累加和为：",iTotal,"\n",sep="")
+
+#repeat循环
+i <- 1
+iTotal <- 0
+repeat	#无条件循环，必须在程序内部设法退出
+{
+	iTotal <- iTotal + i
+    i <- i+1
+    if(i <= 100) next else break	# 注意:next，break的用法
+}
+cat("1-100的累加和为：",iTotal,"\n",sep="")
+```
+
+
+
+###函数使用
+```r
+#自定义函数
+#注意：建立功能丰富，庞大，专业的自定义函数库，类库是公司的核心竞争力
+#pt 函数名
+#function() 关键字，可以在括号里面写上参数，如果参数有初始值的话，还可以用等号
+#Sys.time()获取当前时间
+#options设置当前系统的属性
+#paste 将两个字符串合并，中间的分隔符为""(默认是空格)
+pt <- function(){ szCurTime <- as.character.Date(Sys.time()); options(prompt=paste(szCurTime,">",sep=""))}
+pt()
+#运行结果：2015-12-31 17:09:45>
+
+
+#定义自己的二元运算符，%anything%。两个百分号之间可以是任何字符串
+#定义二元运算符的过程和编写自定义函数本质相同
+"%g%" <- function(x,y){
+	print(x+y)
+    print(x-y)
+    print(x*y)
+    print(x/y)
+}
+4%g%5
+
+#运行结果：
+#[1] 9
+#[1] -1
+#[1] 20
+#[1] 0.8
+
+```
+
+###获取帮助信息
+```r
+?print 	#在RStudio右侧打开相关帮组界面
+help(print)		#同上
+example(print)
+
+?quantmod	#打开扩展包整体帮助信息
+
+apropos（"print*"） #在搜索路径下查找满足正则表达式的所有函数信息
+
+demo(graphics)	#图形例子
+
 ```
 
 </xmp>
@@ -77,7 +188,7 @@ mysql> quit;
 
 <!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
 
-<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
 
 </html>
 
