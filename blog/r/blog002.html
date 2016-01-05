@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>R语言常用数据结构</title>
+
+<xmp theme="Cerulean" style="display:none;">
+R语言常用数据结构
+
+###向量
+```r
+x <- c(1,2,3,4,5);print(x)
+
+x <- 1:10;print(x)
+
+x <- seq(from=1,to=10);print(x)
+
+#1~10,步长为2
+x <- seq(from=1,to=10,by=2);print(x)
+
+#1~10做的等差数列，平分了50份
+x <- seq(from=1,to=10,length.out=50);print(x)
+
+
+#生成日期变量并用生成的日期变量生成一组日期序列数据
+s <- as.Date("2014-1-1")
+e <- as.Date("2014-4-1")
+dtVec <- seq(from=s,to=e,by=1)
+print(dtVec)
+print(class(dtVec))
+
+
+#生成一组重复数据，使用常数初始化指定长度的向量
+x <- rep(1,10);print(x)			#1 1 1 1 1 1 1 1 1 1
+
+x <- rep("USD",5);print(x)		#"USD" "USD" "USD" "USD" "USD"
+
+# sample()取样函数从一组数据中随机取出指定数量的数据
+# 第一个参数表示范围
+# 第二个参数表示个数
+# replace参数决定是否可以重复取数
+y <- sample(x=1:100,size=10,replace=F);print(y)
+
+y <- sample(x=c(0,1),size=20,replace=T);print(y)
+
+# 使用正态分布随机数生成函数生成指定数量、平均值、标准差的随机数
+# 生成10个均值为100，标准差为20的随机数
+x <- rnorm(n=10, mean=100,sd=20;print(x))
+
+
+```
+
+###数组
+```r
+#生成向量然后通过设置行列数据转换成二维数组
+x <- 1:20
+dim(x) <- c(5,4) #将向量转化成5行4列的数组
+print(x)
+
+
+
+#直接生成数组并初始化每个元素为3.14
+x <- array(3.14,dim=c(5,4))
+print(x)
+
+--->
+     [,1] [,2] [,3] [,4]
+[1,] 3.14 3.14 3.14 3.14
+[2,] 3.14 3.14 3.14 3.14
+[3,] 3.14 3.14 3.14 3.14
+[4,] 3.14 3.14 3.14 3.14
+[5,] 3.14 3.14 3.14 3.14
+
+
+#可以生成三维数组
+#使用正太分布随机数初始化整个数组
+#生成40个均值为10，标准差为5的随机数初始化三维数组5行4列2页
+x <- array(rnorm(40,10,5),dim=c(5,4,2))
+print(x)
+print(length(x)) #对于矩阵length()函数得到的是所有元素的总数量
+
+```
+
+###数据框
+```
+
+#数据框的形式和excel比较相似
+#每一列可以看做是一个向量，类型相同；不同l列数据之间可以有不同的类型
+#同列表的重要区别是：数据框要求每一列数据长度相同
+#数据框的每一行可以看作是一条记录，每一列可以看作是记录的某一个属性
+#数据框是金融大数据处理中非常重要的数据结构，用途很广，必须深入了解
+df <- data.frame(symbols=c("MSFT","KO","CSCO"),price=c(40.40, 40.56, 23.02),currency=rep("USD",3),country=rep("USA",3),type=rep("STOCK",3))
+df
+print(class(df))
+
+#列：股票编码，价格，，货币品种，国家，类型
+--->
+  symbols price currency country  type
+1    MSFT 40.40      USD     USA STOCK
+2      KO 40.56      USD     USA STOCK
+3    CSCO 23.02      USD     USA STOCK
+
+
+
+cat("df数据框行数为：", nrow(df),"\ndf数据框列数为：",ncol(df),"\n",sep="")
+--->
+df数据框行数为：3
+df数据框列数为：5
+
+cat("df数据框总元素数量为：",length(df),"\n",sep="") #得到的不是总元素个数，也不是行数，而是列数（属性）数量
+--->
+df数据框总元素数量为：5
+```
+
+
+###列表
+```r
+#列表使用list()函数来定义，列表中的每个元素可以是单个变量或者是向量，甚至是一个列表
+#列表中的每个向量的长度可以不同，这是列表和数据框的重要区别
+#数据框是一种形式特殊的列表
+lst <- list(symbols=c("MSF","KO","CSCO"),price=c(40.40,40.56,23.02),currency="USD",country="USA",type="STOCK")
+lst
+
+
+- - ->
+$symbols
+[1] "MSF"  "KO"   "CSCO"
+
+$price
+[1] 40.40 40.56 23.02
+
+$currency
+[1] "USD"
+
+$country
+[1] "USA"
+
+$type
+[1] "STOCK"
+
+
+print(length(lst)) #共5个元素
+
+```
+
+
+
+###日期时间
+
+```r
+dtVar <- Sys.Date() #获取当前日期
+print(class(dtVar));print(dtVar)
+
+--->
+[1] "Date"
+[1] "2016-01-05"
+
+
+dtVar <- Sys.time()	#获取当前日期和时间
+print(class(dtVar));print(dtVar)
+
+--->
+[1] "POSIXct" "POSIXt" 
+[1] "2016-01-05 12:58:13 CST"
+
+#字符串与时间之间的转换
+dtVar <- as.Date("2016-01-05",tz="UTC")
+print(class(dtVar));print(dtVar)
+
+--->
+[1] "Date"
+[1] "2016-01-05"
+
+dtVar <- as.Date("2016/01/05",tz="CST")
+print(class(dtVar));print(dtVar)
+
+--->
+[1] "Date"
+[1] "2016-01-05"
+
+#用数字直接生成日期对象
+#ISOdate()函数得到的是一个POSIXct对象
+t <- ISOdate(2014,4,17)
+print(class(t));print(t)
+
+--->
+[1] "POSIXct" "POSIXt" 
+[1] "2014-04-17 12:00:00 GMT"
+
+#允许继续加入小时，分钟，秒数信息
+t <- ISOdatetime(2014,4,17,15,28,48)
+print(class(t));print(t)
+
+--->
+[1] "POSIXct" "POSIXt" 
+[1] "2014-04-17 15:28:48 CST"
+
+#将Date日期转化成儒略日期
+
+d <- as.Date("2014-4-17")
+as.integer(d)	#在R中这是自1970-1-1以来的天数
+
+--->
+[1] 16177
+
+julian(d)		#在R中这是自1970-1-1以来的天数
+
+--->
+[1] 16177
+attr(,"origin")
+[1] "1970-01-01"
+
+#提取日期中的各个组成部分信息
+d <- Sys.time()
+p <- as.POSIXlt(d)
+print(class(p));print(mode(p));print(p)
+
+--->
+[1] "POSIXlt" "POSIXt" 
+[1] "list"
+[1] "2016-01-05 13:02:38 CST"
+
+print(p$year+1900)	#p$year 自1900年以来的年份
+print(p$mon+1)		#p$mon	表示0-11月
+print(p$mday)		#p$mday	表示该月的第几天
+
+print(p$yday+1)		#p$yday	表示该年的第几天，0-365天，元旦当前表示第0天
+print(p$wday)		#p$wday	对应周几，0-6，周日为0，其他时间和我们日常习惯一致。
+
+
+
+```
+</xmp>
+
+
+<!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
+
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
