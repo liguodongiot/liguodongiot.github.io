@@ -54,7 +54,7 @@ sudo apt-get install mysql-server
 ####**常用操作**
 ```
 //想myuser使用mypassword从任何主机连接到mysql服务器
-mysql> grant all privileges on *.* to myuser@'%' identified by mypassword with grant option; 
+mysql> grant all privileges on *.* to myuser@'%' identified by 'mypassword' with grant option; 
 //创建用户
 mysql> create user 'hadoop' identified by 'hadoop'; 
 //授权

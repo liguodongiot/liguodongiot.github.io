@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Ubuntu14.04环境Hadoop2.6.0下安装Hive1.2.1</title>
+
+<xmp theme="united" style="display:none;">
+
+
+###安装Hadoop（略）
+###安装mysql（略）
+
+启动mysql
+```shell
+mysql -uroot -p
+```
+
+```sql
+//想myuser使用mypassword从任何主机连接到mysql服务器
+grant all privileges on *.* to myuser@'%' identified by 'mypassword' with grant option;
+
+//创建Hive数据库
+create database hive;
+
+//退出
+quit;
+```
+
+###安装Hive
+```shell
+//解压缩
+sudo tar -zxvf apache-hive-1.2.1-bin.tar.gz
+
+//重命名
+mv apache-hive-1.2.1-bin hive
+
+//修改用户组
+sudo chown -R hadoop2:hadoop hive
+
+//修改配置文件
+cd hive/conf/
+cp hive-default.xml.template hive-site.xml
+cp hive-env.sh.template hive-env.sh
+
+//修改hive-env.sh
+sudo vi hive-env.sh
+HADOOP_HOME=/liguodong/software/hadoop
+```
+//修改hive-site.xml
+```shell
+sudo vi hive-site.xml
+```
+
+```xml
+<property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <!--<value>jdbc:derby:;databaseName=metastore_db;create=true</value>-->
+	<value>jdbc:mysql://localhost:3306/hive?=createDatabaseIfNotExist=true</value>
+    <description>JDBC connect string for a JDBC metastore</description>
+  </property>
+  
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <!--<value>org.apache.derby.jdbc.EmbeddedDriver</value>-->
+	<value>com.mysql.jdbc.Driver</value>
+    <description>Driver class name for a JDBC metastore</description>
+  </property>
+  
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>root</value>
+    <description>Username to use against metastore database</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>root</value>
+    <description>password to use against metastore database</description>
+  </property>
+
+```
+
+**增加驱动：**
+`sudo mv ~/mysql-connector-java-5.1.26-bin.jar /liguodong/software/hive/lib/`
+
+
+**启动Hive：**`bin/hive`
+
+###hive启动报错
+####异常一
+
+```
+[ERROR] Terminal initialization failed; falling back to unsupported
+java.lang.IncompatibleClassChangeError: Found class jline.Terminal, but interface was expected
+        at jline.TerminalFactory.create(TerminalFactory.java:101)
+        at jline.TerminalFactory.get(TerminalFactory.java:158)
+        at jline.console.ConsoleReader.<init>(ConsoleReader.java:229)
+        at jline.console.ConsoleReader.<init>(ConsoleReader.java:221)
+        at jline.console.ConsoleReader.<init>(ConsoleReader.java:209)
+        at org.apache.hadoop.hive.cli.CliDriver.setupConsoleReader(CliDriver.java:787)
+        at org.apache.hadoop.hive.cli.CliDriver.executeDriver(CliDriver.java:721)
+        at org.apache.hadoop.hive.cli.CliDriver.run(CliDriver.java:681)
+        at org.apache.hadoop.hive.cli.CliDriver.main(CliDriver.java:621)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.util.RunJar.run(RunJar.java:221)
+        at org.apache.hadoop.util.RunJar.main(RunJar.java:136)
+
+Exception in thread "main" java.lang.IncompatibleClassChangeError: Found class jline.Terminal, but interfac     e was expected
+        at jline.console.ConsoleReader.<init>(ConsoleReader.java:230)
+        at jline.console.ConsoleReader.<init>(ConsoleReader.java:221)
+        at jline.console.ConsoleReader.<init>(ConsoleReader.java:209)
+        at org.apache.hadoop.hive.cli.CliDriver.setupConsoleReader(CliDriver.java:787)
+        at org.apache.hadoop.hive.cli.CliDriver.executeDriver(CliDriver.java:721)
+        at org.apache.hadoop.hive.cli.CliDriver.run(CliDriver.java:681)
+        at org.apache.hadoop.hive.cli.CliDriver.main(CliDriver.java:621)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.util.RunJar.run(RunJar.java:221)
+        at org.apache.hadoop.util.RunJar.main(RunJar.java:136)
+
+```
+**原因： **
+hadoop目录下存在老版本jline： 
+/hadoop-2.6.0/share/hadoop/yarn/lib：
+jline-0.9.94.jar
+
+
+**解决： **
+```shell
+cp {HIVE_HOME}/lib/jline-2.12.jar {HADOOP_HOME}/share/hadoop/yarn/lib
+```
+
+
+####异常二
+```
+Exception in thread "main" java.lang.RuntimeException: java.lang.IllegalArgumentException: java.net.URISyntaxException: Relative path in absolute URI: ${system:java.io.tmpdir%7D/$%7Bsystem:user.name%7D
+
+        at org.apache.hadoop.hive.ql.session.SessionState.start(SessionState.java:522)
+
+        at org.apache.hadoop.hive.cli.CliDriver.run(CliDriver.java:677)
+
+        at org.apache.hadoop.hive.cli.CliDriver.main(CliDriver.java:621)
+
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+
+        at java.lang.reflect.Method.invoke(Method.java:606)
+
+        at org.apache.hadoop.util.RunJar.run(RunJar.java:221)
+
+        at org.apache.hadoop.util.RunJar.main(RunJar.java:136)
+
+Caused by: java.lang.IllegalArgumentException: java.net.URISyntaxException: Relative path in absolute URI: ${system:java.io.tmpdir%7D/$%7Bsystem:user.name%7D
+
+        at org.apache.hadoop.fs.Path.initialize(Path.java:206)
+
+        at org.apache.hadoop.fs.Path.<init>(Path.java:172)
+
+        at org.apache.hadoop.hive.ql.session.SessionState.createSessionDirs(SessionState.java:563)
+
+        at org.apache.hadoop.hive.ql.session.SessionState.start(SessionState.java:508)
+
+        ... 8 more
+
+Caused by: java.net.URISyntaxException: Relative path in absolute URI: ${system:java.io.tmpdir%7D/$%7Bsystem:user.name%7D
+
+        at java.net.URI.checkPath(URI.java:1804)
+
+        at java.net.URI.<init>(URI.java:752)
+
+        at org.apache.hadoop.fs.Path.initialize(Path.java:203)
+
+        ... 11 more
+```
+
+解决方案如下：
+1.查看hive-site.xml配置，会看到配置值含有"system:java.io.tmpdir"的配置项
+
+2.新建文件夹{HIVE_HOME}/hive/io_tmp
+
+3.将含有"system:java.io.tmpdir"的配置项的值修改为如上地址
+
+```xml
+<property>
+  <name>hive.exec.local.scratchdir</name>
+  <!-- value>${system:java.io.tmpdir}/${system:user.name}</value -->
+  <value>{HIVE_HOME}/io_tmp/liguodong</value>
+  <description>Local scratch space for Hive jobs</description>
+</property>
+
+<property>
+  <name>hive.downloaded.resources.dir</name>
+  <!-- value>${system:java.io.tmpdir}/${hive.session.id}_resources</value -->
+  <value>{HIVE_HOME}/io_tmp/${hive.session.id}_resources</value>
+  <description>Temporary local directory for added resources in the remote file system.</description>
+</property>
+
+<property>
+  <name>hive.querylog.location</name>
+  <!-- value>${system:java.io.tmpdir}/${system:user.name}</value -->
+  <value>{HIVE_HOME}/io_tmp/liguodong</value>
+  <description>Location of Hive run time structured log file</description>
+</property>
+
+<property>
+  <name>hive.server2.logging.operation.log.location</name>
+  <!-- value>${system:java.io.tmpdir}/${system:user.name}/operation_logs</value -->
+  <value>{HIVE_HOME}/io_tmp/liguodong/operation_logs</value>
+  <description>Top level directory where operation logs are stored if logging functionality is enabled</description>
+</property>
+```
+
+####异常三
+```
+Caused by: java.sql.SQLException: Access denied for user 'root'@'master' (using password: YES)
+
+        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:946)
+
+        at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2870)
+
+        at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:812)
+
+        at com.mysql.jdbc.MysqlIO.secureAuth411(MysqlIO.java:3269)
+
+        at com.mysql.jdbc.MysqlIO.doHandshake(MysqlIO.java:1182)
+
+        at com.mysql.jdbc.Connection.createNewIO(Connection.java:2670)
+
+        at com.mysql.jdbc.Connection.<init>(Connection.java:1531)
+
+        at com.mysql.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:266)
+
+        at java.sql.DriverManager.getConnection(DriverManager.java:571)
+
+        at java.sql.DriverManager.getConnection(DriverManager.java:187)
+
+        at com.jolbox.bonecp.BoneCP.obtainRawInternalConnection(BoneCP.java:361)
+
+        at com.jolbox.bonecp.BoneCP.<init>(BoneCP.java:416)
+
+        ... 60 more
+```
+
+解决方法：
+```sql
+grant all privileges on *.* to myuser@'%' identified by 'mypassword' with grant option;
+```
+
+###Hive与Mysql的对应关系
+Hive进行操作，相应MySQL中也会进行操作。
+eg：
+`create table temptable(tempcol string);`
+![](image/0001.jpg)
+
+</xmp>
+
+
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
