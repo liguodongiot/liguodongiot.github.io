@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>R语言常用的数据分析函数</title>
+
+<xmp theme="Cerulean" style="display:none;">
+
+
+```r
+#显示加载到内存中的变量和函数名称
+ls()
+
+#显示加载到内存中的变量和函数的详细信息
+ls.str()
+
+# 计算返回向量中最大、最小的元素的索引值
+> x <- 1:100
+> print(which.max(x))
+[1] 100
+> print(which.min(x))
+[1] 1
+
+
+
+# 如果向量中存在多个相等的最大、最小值返回的是第一个最大、最小值的索引
+> x <- c(1,2,5,2,1,5)
+> print(which.max(x))
+[1] 3
+> print(which.min(x))
+[1] 1
+
+# 返回最大、最小值
+> print(max(x))
+[1] 5
+> print(min(x))
+[1] 1
+
+
+# 对向量进行排序，默认采用升序排序方式
+> x <- c(3,5,2,8,6,9,7,4)
+> print(sort(x))
+[1] 2 3 4 5 6 7 8 9
+
+> print(sort(x,decreasing=T))   # 默认的降序参数设置为F，如果设置为T则采用降序排序
+[1] 9 8 7 6 5 4 3 2
+
+
+
+# 日期字符串向量
+> szDate <- c("2014-1-1","2014-3-1","2014-3-18","2014-2-14","2014-4-26","2014-4-1","2014-1-24")
+
+# 通过as.Date()函数生成日期序列
+# 注意：R语言中很多函数都可以使用向量做参数
+> t <- as.Date(szDate)
+
+# sort()函数可以对日期序列做排序操作
+> t <- sort(t);print(t)
+[1] "2014-01-01" "2014-01-24" "2014-02-14" "2014-03-01" "2014-03-18" "2014-04-01"
+[7] "2014-04-26"
+
+
+# rev()函数对向量做逆序处理
+> x <- c(3,5,2,8,6,9,7,4)
+> print(x);print(rev(x))
+[1] 3 5 2 8 6 9 7 4
+[1] 4 7 9 6 8 2 5 3
+
+> # 上例中的日期型数据同样可以逆序排列
+> print(t);print(rev(t))
+[1] "2014-01-01" "2014-01-24" "2014-02-14" "2014-03-01" "2014-03-18" "2014-04-01"
+[7] "2014-04-26"
+[1] "2014-04-26" "2014-04-01" "2014-03-18" "2014-03-01" "2014-02-14" "2014-01-24"
+[7] "2014-01-01"
+
+
+# 获取游程的信息
+> x <- c(1,-1,1,1,1,-1,-1,1,1,1,1,1,1,1)
+> y <- rle(x)
+> print(mode(y))
+[1] "list"
+> str(y)
+List of 2
+ $ lengths: int [1:5] 1 1 3 2 7
+ $ values : num [1:5] 1 -1 1 -1 1
+ - attr(*, "class")= chr "rle"
+
+
+
+
+
+# 按照大小对向量数据做分类处理，可以用于绘制直方图
+> x <- rnorm(n=10,mean=10,5) #产生10个均值为10，标准差为5的正态分布随机数
+> print(x)
+ [1] 12.035945 11.746368  6.194775 13.411894 -2.747434  2.736881  9.476196 17.202233
+ [9] 14.509309 -2.196645
+
+> breaks <- c(-20,-10,0,10,20)   # 分割数据的边界数值向量
+
+> y <- cut(x,breaks)
+
+> print(summary(y))
+(-20,-10]   (-10,0]    (0,10]   (10,20] 
+        0         2         3         5 
+
+
+# 在向量中查找指定数据（数据可用向量形式给出）,此函数返回一个和原向量等长的向量
+# 存在待匹配数据的位置上标记为N(第N个待匹配数据就标记N)
+> x <- c(2,5,1,4,6,4,3)
+> print(match(x,4))
+[1] NA NA NA  1 NA  1 NA
+> print(match(x,c(4,5)))
+[1] NA  2 NA  1 NA  1 NA
+
+
+# 计算组合数/排列数
+> print(choose(5,2))	#组合数 c(5,2)
+[1] 10
+> print(factorial(3))	#排列数 3!
+[1] 6
+
+
+# 符号函数
+# 每日股市上涨下跌收益率有正有负可以用sign()函数生成1,-1,0组成的游程序列
+> cat("sign()函数运算结果：",sign(0),",",sign(3.14159),",",sign(-1024),sep="")
+sign()函数运算结果：0,1,-1
+
+
+
+# 删除向量、矩阵、数据框中的NA值
+> x <- c(1,2,NA,4,5,NA,7,6,8,9)
+
+> y <- na.omit(x);print(y);
+[1] 1 2 4 5 7 6 8 9
+attr(,"na.action")
+[1] 3 6
+attr(,"class")
+[1] "omit"
+
+> print(length(y));print(class(y))
+[1] 8
+[1] "numeric"
+
+
+
+> dim(x) <- c(5,2)
+> print(x)
+     [,1] [,2]
+[1,]    1   NA
+[2,]    2    7
+[3,]   NA    6
+[4,]    4    8
+[5,]    5    9
+
+> print(na.omit(x)) # 删除数组中的NA值的规则是删除含有NA值的整行数据
+     [,1] [,2]
+[1,]    2    7
+[2,]    4    8
+[3,]    5    9
+attr(,"na.action")
+[1] 3 1
+attr(,"class")
+[1] "omit"
+
+# 交易品的历史数据中可能存在NA数值，使用na.omit()函数将会删除整条历史记录
+
+
+# 检测向量、矩阵、数据框中是否包含NA数值，如果包含返回错误信息
+> x <- c(1,2,NA,4,5,NA,7,6,8,9)
+> y <- na.omit(x)
+> na.fail(x)
+Error in na.fail.default(x) : missing values in object
+> na.fail(y)
+[1] 1 2 4 5 7 6 8 9
+attr(,"na.action")
+[1] 3 6
+attr(,"class")
+[1] "omit"
+
+
+> dim(x) <- c(2,5)
+> na.fail(x)
+Error in na.fail.default(x) : missing values in object
+
+
+# 去除向量中的重复数据
+> x <- c(1,2,NA,2,5,NA,4,3,4,9)
+> print(unique(x))
+[1]  1  2 NA  5  4  3  9
+
+
+# subset()从数据框中取出满足条件的子集
+# 对于历史行情数据、历史交易记录可以很方便的取出其中感兴趣的数据
+> data(airquality)	#加载空气质量的数据
+> head(airquality)
+  Ozone Solar.R Wind Temp Month Day
+1    41     190  7.4   67     5   1
+2    36     118  8.0   72     5   2
+3    12     149 12.6   74     5   3
+4    18     313 11.5   62     5   4
+5    NA      NA 14.3   56     5   5
+6    28      NA 14.9   66     5   6
+> # 第一个参数：数据集
+> # 第二个参数：逻辑变量 Temp>80并且month==5
+> #	第三个参数：在新的子集选择那些列 从Ozone到Day的所有数据
+> newset <- subset(airquality,Temp > 80 & Month == 5,select = c(Ozone:Day))
+> head(newset)
+   Ozone Solar.R Wind Temp Month Day
+29    45     252 14.9   81     5  29
+
+```
+
+</xmp>
+
+
+<!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
