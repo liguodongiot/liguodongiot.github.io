@@ -1,9 +1,0 @@
-*.md
-!/_static/.md
-pkg/
-src/
-bin/
-/bindata.go
-/server
-/strapdown-server
-/_static/version
