@@ -1,0 +1,8 @@
+language: go
+go:
+  - tip
+python:
+  - "2.7"
+install: 
+  - "sudo pip install requests"
+script: make -C server deps all test
