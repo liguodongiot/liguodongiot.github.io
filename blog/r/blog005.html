@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>R语言的基础绘图技术</title>
+
+<xmp theme="Cerulean" style="display:none;">
+
+### 高水平绘图函数
+```r
+x <- 1:100 #生成1-100的向量
+y <- 100 + x*5	#100是截距，5是斜率
+#windows是生成一个窗口更，plot是绘图
+windows(300,200);plot(y) #散点图
+
+windows(300,200);plot(y,type="l")	#直线
+
+
+# 生成100个正态分布随机数并绘图
+x <- rnorm(100,10,5)	#均值为10，标准差为5
+plot(x)
+
+
+# 绘制1000个正态分布随机数的频数直方图
+x <- rnorm(1000,30,10)
+hist(x)
+
+
+
+# 使用核密度估计函数density()，在直方图上绘制密度曲线
+# hist()函数必须设置freq参数为F才能显示密度曲线
+x <- rnorm(1000,30,10)
+hist(x,freq=F)
+lines(density(x),col="blue")
+box() #给图加一个方框，看起来完整一些
+
+
+# 茎叶图很直观的表现出数据的分布情况
+x <- rnorm(100,5,1)
+stem(x)
+
+
+# 绘制10个正态分布随机数的条形图
+x <- rnorm(10,30,10);barplot(x)
+box() # 在当前图上加个方框
+
+
+# 绘制饼图
+x <-1:5;pie(x,col=rainbow(5)) #rainbow，向量有5个值，不会自己选颜色，系统自动分配
+box()
+
+
+# 绘制箱线图
+# 中间黑线为中位数位置；上下框线为上下四分位数位置；上下触须为1.5倍四分位数间距；如果有孤立点表示异常值
+x <-rnorm(10,10,3);boxplot(x)
+
+
+# 绘制向日葵图
+data(iris)
+sunflowerplot(iris[,3:4])
+
+
+# 绘制矩阵或数据框的二元图
+data(iris)
+pairs(iris[1:4], main = "Anderson's Iris Data -- 3 species",pch = 21, bg = c("red", "green3", "blue")[unclass(iris$Species)])
+
+
+
+# 绘制QQ图
+# 如果向量为正态分布则数据点基本在一条直线上
+x <- rnorm(500,10,5);qqnorm(x)
+
+
+
+# 根据指定函数绘制指定范围的曲线图
+curve(sin, -2*pi, 2*pi, xname = "t")
+
+
+```
+
+### 低水平绘图函数
+在高水平绘图函数绘制的图形上做补充和修饰
+
+```
+# 生成50个正态分布随机数并绘图
+x <- 1:50
+y <- rnorm(50,10,5)
+#横坐标
+#纵坐标
+#type="n"表示开始不绘图
+#横坐标的名称
+#纵坐标的名称
+#横坐标的范围
+#纵坐标的范围
+#main表示主名称
+#sub表示副标题
+plot(x,y,type="n",xlab="数据索引",ylab="随机数点",xlim=c(1,50),ylim=c(-20,20),main="实验图",sub="随机数绘图") #高水平绘图
+points(x,y,col="blue")	#低水平绘图，绘制所有的点
+lines(x,y,col="red") #将所有的点连成线
+
+text(5,max(y),"随机数据点")           # 在指定坐标位置放置文本
+
+mtext("横轴下方文字",side=1)          # 横轴、纵轴上放置文字
+mtext("纵轴左方文字",side=2)
+mtext("横轴上方文字",side=3)
+mtext("纵轴右方文字",side=4)
+
+segments(10,10,50,-10)                # 根据起点、终点坐标绘制线段
+
+#15表示箭头的角度
+arrows(10,-10,40,20,angle=15,code=1) # 绘制带箭头线段，可以设置箭头角度，有几个箭头（1起点箭头、2终点箭头，3双箭头）
+
+abline(-20,.5) # 在图上绘制直线，第一个参数为截距，第二个参数为斜率
+
+abline(h=0,col="red") # 在图上绘制水平线或垂直线，可以标示临界位置，很好用的功能
+
+legend(0,max(y),"随机点连线") #图例
+
+
+
+
+# 坐标定位模式获得鼠标点击位置的坐标
+x <- 1:50
+y <- rnorm(50,10,5)
+plot(x,y,type="n",xlab="数据索引",ylab="随机数点",xlim=c(1,50),ylim=c(-20,20),main="实验图")
+print(locator(3,type="p")) # 图像进入定位模式，第一个参数决定获取几个点的坐标信息，第二个参数决定绘图方式
+
+rect(5,5,20,20) # 在已经成功绘制的图形内部绘制一个长方形
+
+polygon(c(20,10,30,40,45),c(-10,0,15,4,-10)) # 在高级图形内部绘制多边形
+
+
+setwd("D:/rstudiodir") #设置当前工作目录
+
+# 生成一个绘图窗口在其中绘制图形后用savePlot()函数保存
+windows()
+plot(1:10)
+rect(1, 5, 3, 7, col="blue")
+savePlot("test01", type="jpg",device=dev.cur(),restoreConsole=TRUE)
+
+
+
+# 直接在jpeg设备上绘制图形，完成后使用dev.off()关闭设备，存盘退出
+jpeg(file="myplot.jpeg")
+plot(1:10)
+rect(1, 5, 3, 7, col="blue")
+dev.off()
+
+
+```
+
+</xmp>
+
+
+<!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

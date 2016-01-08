@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>金融数据获取</title>
+
+<xmp theme="Cerulean" style="display:none;">
+
+
+
+>**从雅虎金融等数据网站获取：各国股票、股指、债券、ETF基金、
+汇率、金属、期权等交易品种历史数据和上市公司年报数据。**
+
+```
+#加载quantmod包
+library(quantmod)
+
+# 不设置来源则默认从雅虎金融下载；
+# 雅虎金融上大量指数品种都以"^"开头
+# from,to参数设置读取历史数据的时间段
+#各参数的解释
+#品种
+#来源
+#开始时间
+#结束时间
+getSymbols("^GSPC",src="yahoo",from="1994-1-1",to=Sys.Date())
+print(head(GSPC));print(tail(GSPC))
+print(class(GSPC))
+#xts表示时间序列，zoo是xts的一个扩展版本
+print(is.OHLC(GSPC))
+print(is.OHLCV(GSPC))
+
+
+# 从雅虎金融读取著名的苹果公司的全部股票数据
+getSymbols("AAPL",src="yahoo",from="1900-1-1",to=Sys.Date()) 
+print(head(AAPL));print(tail(AAPL))
+
+
+# 从雅虎金融读取著名港股长江实业的股票数据
+# 港股和大陆A股类似使用数字编号，雅虎金融上面有全球几十个市场的数据需要进行区分
+# 美股不使用后缀而其他国家或地区的股票需要使用后缀:大陆沪市使用:".SS"，深市使用:".SZ"，香港使用:".HK"
+setSymbolLookup(CJSY=list(name="0001.HK",src="yahoo"))   # 在函数内部用列表指明股票代码和查询网站并指定一个变量名便于保存
+getSymbols("CJSY",from="1900-1-1",to=Sys.Date()) 
+print(head(CJSY));print(tail(CJSY))
+
+
+
+# 用字符串向量保存股票代码一次下载一组股票数据
+# 下载股票数量超过5种时系统会自动暂停1秒
+szSymbols <- c("MSFT","ORCL","GOOG","INTL","AAPL","CSCO","SYMC","TSLA")
+getSymbols(szSymbols,src="yahoo",from="2008-1-1",to=Sys.Date()) #默认保存在股票代码里面
+
+
+# 美国10年期债券收益率
+getSymbols("^TNX",src="yahoo",from="1900-1-1",to=Sys.Date()) 
+print(head(TNX));print(tail(TNX))
+
+
+
+# ETF基金，伊斯兰地区ETF基金，2008-03-28
+getSymbols("ACWI",src="yahoo",from="1900-1-1",to=Sys.Date()) 
+print(head(ACWI));print(tail(ACWI))
+
+
+
+# 获取美元兑日元汇率数据
+# 只能获取最近1年多的汇率历史数据，并且只有收盘价
+getFX("USD/JPY")
+print(head(USDJPY));print(tail(USDJPY))
+
+
+
+# 获取欧元兑美元汇率数据
+getSymbols("EUR/USD",src="oanda")
+print(head(EURUSD));print(tail(EURUSD))
+
+
+
+# 运行这一段代码会出现错误，该数据源（oanda）每次请求只能获取500天以内的数据
+# 外汇是极其重要的交易品种，每天成交量超过5.3万亿美金，大型对冲基金都要操作，500天的数据完全不够分析
+# 需要获取超过30年，每天OHLC历史数据的方法
+getSymbols("EUR/USD",src="oanda",from="2005-01-01")
+
+
+# 获取交易品当前最新的详细报价数据信息
+tmp <- getQuote("AAPL");print(tmp);print(class(tmp))
+
+
+# 获取财报信息
+getFinancials("TSLA")
+viewFin(TSLA.f)
+
+viewFin(TSLA.f,"CF","A")    #  每年的现金流
+
+
+# 获得股票的股息历史数据
+getDividends("AAPL")
+
+
+# 获得股票的拆分信息，拆分是为了让每一股的股价变得更小一些，往往是股价涨得非常大的时候进行拆分
+getSplits("BIDU")
+
+
+
+# 对股票进行除权除息调整
+# 除权除息对于早期历史数据影响更明显
+getSymbols("BIDU", from="2005-01-01", src="yahoo")
+head(BIDU)
+head(BIDU.a  <- adjustOHLC(BIDU))   # 默认调整方式不使用Adjusted列的数据
+head(BIDU.uA <- adjustOHLC(BIDU, use.Adjusted=T)) 
+
+
+# 计算除权除息之后的开盘价收盘价收益率和收盘价收益率，保持不变
+head(cbind(OpCl(BIDU),OpCl(BIDU.a),OpCl(BIDU.uA)))
+head(cbind(ClCl(BIDU),ClCl(BIDU.a),ClCl(BIDU.uA)))
+
+
+
+# 获取期权信息
+# 期权是极为重要的交易品种
+
+BIDU.OPT <- getOptionChain("BIDU")
+print(class(BIDU.OPT))  # 获取的期权链数据保存在列表中
+print(BIDU.OPT)         # 显示全部期权链数据量非常大
+print(BIDU.OPT$symbol)  # 显示期权链列表中的symbol数据
+print(BIDU.OPT$calls)   # 显示期权链列表中的看涨期权数据
+
+```
+
+</xmp>
+
+
+<!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
