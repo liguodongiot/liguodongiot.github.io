@@ -2,7 +2,7 @@
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<title>金融数据获取</title>
+<title>R语言金融数据获取</title>
 
 <xmp theme="Cerulean" style="display:none;">
 
@@ -25,10 +25,13 @@ library(quantmod)
 #结束时间
 getSymbols("^GSPC",src="yahoo",from="1994-1-1",to=Sys.Date())
 print(head(GSPC));print(tail(GSPC))
-print(class(GSPC))
-#xts表示时间序列，zoo是xts的一个扩展版本
-print(is.OHLC(GSPC))
-print(is.OHLCV(GSPC))
+> print(class(GSPC))
+[1] "xts" "zoo"		#xts表示时间序列，zoo是xts的一个扩展版本
+
+> print(is.OHLC(GSPC))
+[1] TRUE
+> print(is.OHLCV(GSPC))
+[1] TRUE
 
 
 # 从雅虎金融读取著名的苹果公司的全部股票数据
@@ -87,9 +90,8 @@ tmp <- getQuote("AAPL");print(tmp);print(class(tmp))
 
 
 # 获取财报信息
-getFinancials("TSLA")
+getFinancials("TSLA")    # 由于需要访问google，会报cannot open URL的错误
 viewFin(TSLA.f)
-
 viewFin(TSLA.f,"CF","A")    #  每年的现金流
 
 
@@ -111,15 +113,16 @@ head(BIDU.uA <- adjustOHLC(BIDU, use.Adjusted=T))
 
 
 # 计算除权除息之后的开盘价收盘价收益率和收盘价收益率，保持不变
-head(cbind(OpCl(BIDU),OpCl(BIDU.a),OpCl(BIDU.uA)))
-head(cbind(ClCl(BIDU),ClCl(BIDU.a),ClCl(BIDU.uA)))
+head(cbind(OpCl(BIDU),OpCl(BIDU.a),OpCl(BIDU.uA)))	#开盘
+head(cbind(ClCl(BIDU),ClCl(BIDU.a),ClCl(BIDU.uA)))	#收盘
 
 
 
 # 获取期权信息
 # 期权是极为重要的交易品种
 
-BIDU.OPT <- getOptionChain("BIDU")
+#不知为何不能获取期权链
+BIDU.OPT <- getOptionChain("BIDU") #得到期权链
 print(class(BIDU.OPT))  # 获取的期权链数据保存在列表中
 print(BIDU.OPT)         # 显示全部期权链数据量非常大
 print(BIDU.OPT$symbol)  # 显示期权链列表中的symbol数据

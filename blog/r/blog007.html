@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>R语言金融数据绘图与技术指标</title>
+
+<xmp theme="Cerulean" style="display:none;">
+
+>**金融时间序列的绘图、quantmod软件包中的专用函数绘图、把常用技术指标、成交量等内容加入图形**
+
+
+```r
+#获取历史数据
+2016-01-09 19:56:10>getSymbols("^GSPC",src="yahoo",from="2004-1-1",to="2014-1-1")
+[1] "GSPC"
+
+2016-01-09 19:56:10>tail(GSPC)
+           GSPC.Open GSPC.High GSPC.Low GSPC.Close GSPC.Volume GSPC.Adjusted
+2013-12-23   1822.92   1829.75  1822.92    1827.99  2851540000       1827.99
+2013-12-24   1828.02   1833.32  1828.02    1833.32  1307630000       1833.32
+2013-12-26   1834.96   1842.84  1834.96    1842.02  1982270000       1842.02
+2013-12-27   1842.97   1844.89  1839.81    1841.40  2052920000       1841.40
+2013-12-30   1841.47   1842.47  1838.77    1841.07  2293860000       1841.07
+2013-12-31   1842.61   1849.44  1842.41    1848.36  2312840000       1848.36
+
+#获取收盘价的数据
+2016-01-09 19:56:10>GSPCClose <- Cl(GSPC)
+2016-01-09 19:56:10>tail(GSPCClose)
+           GSPC.Close
+2013-12-23    1827.99
+2013-12-24    1833.32
+2013-12-26    1842.02
+2013-12-27    1841.40
+2013-12-30    1841.07
+2013-12-31    1848.36
+
+```
+
+```r
+# plot()是泛型函数能够根据输入自变量的类型不同调用不同模块绘制图形
+# 只能对收盘价这样的单个数据点绘图
+2016-01-09 19:56:10>windows()
+2016-01-09 19:56:10>plot(GSPCClose)
+```
+![](image/0005.jpg)
+
+```r
+# chartSeries() 绘图
+# 函数可以直接接受OHLCV时间序列作为输入
+windows()
+chartSeries(GSPC)
+```
+![](image/0003.jpg)
+
+```r
+# 只用收盘价数据也没问题
+2016-01-09 19:56:10>windows()
+2016-01-09 19:56:10>chartSeries(GSPCClose) 
+```
+![](image/0004.jpg)
+
+```r
+# chartSeries()详细参数使用
+2016-01-09 19:56:10>windows()
+2016-01-09 19:56:10>chartSeries(GSPC,
+             name="标普500走势图",
+             type="candlesticks",
+             subset="2012/2013",        # ISO8601风格的字符串用于表示时间范围
+             TA=NULL,                   # 默认使用"addVo()"将成交量显示在图形底部，设置为NULL增加显示范围
+             theme=chartTheme("white")) # 使用名为"white"的绘图主题
+```
+![](image/0006.jpg)
+
+
+
+```r
+2016-01-09 19:56:10># 获取white绘图主题的参数
+2016-01-09 19:56:10>theme.white <- chartTheme("white")
+
+2016-01-09 19:56:10># 查看绘图主题所有参数
+2016-01-09 19:56:10>names(theme.white)
+ [1] "fg.col"       "bg.col"       "grid.col"     "border"       "minor.tick"   "major.tick"  
+ [7] "up.col"       "dn.col"       "dn.up.col"    "up.up.col"    "dn.dn.col"    "up.dn.col"   
+[13] "up.border"    "dn.border"    "dn.up.border" "up.up.border" "dn.dn.border" "up.dn.border"
+[19] "main.col"     "sub.col"      "area"         "fill"         "Expiry"       "theme.name"
+```
+
+
+```r
+#修改主题
+2016-01-09 19:56:10>theme.white$up.col <- "red"
+2016-01-09 19:56:10>theme.white$dn.col <- "white"
+2016-01-09 19:56:10>theme.white$border <- "lightgray"
+
+2016-01-09 19:56:10>windows()
+2016-01-09 19:56:10>chartSeries(GSPC,
+             name="标普500走势图",
+             type="candlesticks",
+             subset="2013-6/",        # 2013年6月到最后一个数据
+             TA=NULL,     
+             theme=theme.white)       # 使用参数经过修改的绘图主题
+```
+![](image/0007.jpg)
+
+```r
+# 使用文字描述的取子集功能
+2016-01-09 19:56:10>windows()
+2016-01-09 19:56:10>chartSeries(GSPC,
+             name="标普500走势图",
+             show.grid = T,           # 无论是否使用此参数都看到
+             type="candlesticks",
+             subset="last 3 months",  # 使用文字描述，最后3个月时间序列值
+             TA="addVo()",            # 加入成交量数据
+             theme=theme.white)
+```
+![](image/0008.jpg)
+
+```r
+# reChart()的大多数参数和chartSeries()相似用于对最新绘制的图形做修改
+2016-01-09 19:56:10>reChart(theme=chartTheme("black"),
+         subset="last 6 months")
+		 
+```
+![](image/0009.jpg)
+
+```r
+# 加入多个技术指标
+2016-01-09 19:56:10>chartSeries(GSPC,
+             name="标普500走势图",
+             show.grid = T,             # 无论是否使用此参数都看到
+             type="candlesticks",
+             subset="last 2 quarters",  # 使用文字描述，最后2个季度的时间序列值
+             TA="addVo();addSMA(20);addBBands(20,3)", # 加入简单移动平均线和布林线指标，不是指标函数
+             theme=theme.white)         # 使用参数经过修改的绘图主题
+```
+![](image/0010.jpg)
+
+
+```r
+# chartSeries()函数绘制出的图形通过zooom()函数做缩放操作
+# n   每次调用函数时交互图形变化的倍数
+# eps 点击鼠标几次图形发生改变
+zooom(n=1,eps=2)
+
+
+# 放大2012年的历史数据
+zoomChart("2012")
+
+# 放大2012年9月的历史数据，第三轮QE启动
+zoomChart("2012-9")
+
+# 直接使用addCCI()函数在当前图形上添加新技术指标
+zoomChart("2012") #当前图形
+addCCI(20)
+
+```
+
+
+```r
+2016-01-09 19:56:10>windows()
+2016-01-09 19:56:10>chartSeries(GSPC,
+             name="标普500走势图",
+             show.grid = T,             # 无论是否使用此参数都看到
+             type="candlesticks",
+             subset="last 2 quarters",  # 使用文字描述，最后2个季度的时间序列值
+             TA="addVo();addSMA(20);addBBands(20,3)", # 加入简单移动平均线和布林线指标，不是指标函数
+             theme=theme.white)         # 使用参数经过修改的绘图主题  
+
+			 
+			 
+# 默认使用的是"pdf"参数，图形被保存在当前目录下
+# 运行时经常出错
+2016-01-09 19:56:10>saveChart(.type="jpeg",dev=dev.cur())
+
+2016-01-09 19:56:10>dir()
+[1] "test01.jpg"         "标普500走势图.jpeg"
+
+
+# 使用jpeg()和dev.off()函数配合保存绘制的图形到JPEG文件中
+2016-01-09 19:56:10>jpeg("GSPC.jpeg")
+
+2016-01-09 19:56:10>chartSeries(GSPC,
+             name="标普500走势图",
+             show.grid = T,             # 无论是否使用此参数都看到
+             type="candlesticks",
+             subset="last 2 quarters",  # 使用文字描述，最后2个季度的时间序列值
+             TA="addVo();addSMA(20);addBBands(20,3)", # 加入简单移动平均线和布林线指标，不是指标函数
+             theme=theme.white)         # 使用参数经过修改的绘图主题  
+			 
+2016-01-09 19:56:10>dev.off()
+windows 
+      5 
+	  
+2016-01-09 19:56:10>dir()
+[1] "GSPC.jpeg"          "test01.jpg"         "标普500走势图.jpeg"	  
+```
+
+</xmp>
+
+
+<!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
