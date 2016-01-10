@@ -2,83 +2,118 @@
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<title>常用工具的快捷键</title>
+<title>Git常见命令</title>
 
-<xmp theme="chaitin" toc="true" style="display:none;">
-###**RStudio快捷键**
-Ctrl + L			清除控制台输出
+<xmp theme="Cerulean" style="display:none;">
 
-Ctrl + Enter		运行光标所在行的R代码 或 当前选中行的R代码
-
-Ctrl + Shift + S	运行当前脚本文件
-
-Ctrl + D			删除整行
-
----
-
-###**命令行安装flash**
 ```
-sudo apt-get update
-sudo apt-get install flashplugin-installer
-```
+#新的项目
+liguodong@WIN-0HGJ9QM2MEG /g/github
+$ git init projectExample
+Initialized empty Git repository in g:/github/projectExample/.git/
 
-###**命令行安装forefox**
-```
-sudo apt-get update
-sudo apt-get install firefox
-```
-
-###**命令行安装vim**
-```
-sudo apt-get update
-sudo apt-get install vim
-```
-
-配置vim编辑器
-终端切到在主目录下（cd ~）
-执行命令 vim .vimrc打开或创建vim的配置文件
-加入自己的配置方案
-例如：
-`set nu`     "是显示行号
-`set showmatch`    "显示括号匹配等
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ pwd
+/g/github/projectExample
 
 
-###**jd-gui    反编译java源码**
-下载`jd-gui-0.3.3.linux.i686.tar.gz`
-执行`tar  -xzvf  jd-gui-0.3.3.linux.i686.tar.gz`
-```
-sudo  mv  jd-gui  /usr/local/bin
-```
-就可以运行了，只需将.class文件拖拽到jd-gui中
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ ls -al  .git
+total 4
+drwxr-xr-x    9 liguodon Administ     4096 Jan 10 22:08 .
+drwxr-xr-x    3 liguodon Administ        0 Jan 10 22:08 ..
+-rw-r--r--    1 liguodon Administ       23 Jan 10 22:08 HEAD
+-rw-r--r--    1 liguodon Administ      157 Jan 10 22:08 config
+-rw-r--r--    1 liguodon Administ       73 Jan 10 22:08 description
+drwxr-xr-x   11 liguodon Administ        0 Jan 10 22:08 hooks
+drwxr-xr-x    3 liguodon Administ        0 Jan 10 22:08 info
+drwxr-xr-x    4 liguodon Administ        0 Jan 10 22:08 objects
+drwxr-xr-x    4 liguodon Administ        0 Jan 10 22:08 refs
 
-###**MySQL安装**
-```
-sudo apt-get install mysql-server
-```
 
-登录：`mysql -uroot -p`
+#当需要与别人分享时
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ git remote add origin https://github.com/liguodongwork/projectExample
 
-####**常用操作**
-```
-//想myuser使用mypassword从任何主机连接到mysql服务器
-mysql> grant all privileges on *.* to myuser@'%' identified by mypassword with grant option; 
-//创建用户
-mysql> create user 'hadoop' identified by 'hadoop'; 
-//授权
-mysql> grant all on *.* to hadoop@'%' with grant option; 
-mysql> quit;
-[root@hadoop9 hadoop]# mysql -uhadoop -p 
-mysql> create database hive; 
-mysql> quit;
+
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ cat .git/config
+[core]
+        repositoryformatversion = 0
+        filemode = false
+        bare = false
+        logallrefupdates = true
+        symlinks = false
+        ignorecase = true
+        hideDotFiles = dotGitOnly
+[remote "origin"]
+        url = https://github.com/liguodongwork/projectExample
+        fetch = +refs/heads/*:refs/remotes/origin/*
+
+
+#配置用户信息 设置了user.name和user.email对工作的产权很重要。
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
+$ git config --global user.name
+liguodong
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
+$ git config --global user.email
+liguodongiot@163.com	
+
+
+#设置行尾，以满足不同操作系统
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
+$ git config --global core.autocrlf true  	#Windows
+
+
+$ git config --global core.autocrlf input	#Linux，Mac
+
+
+如果你是Windows程序员，且正在开发仅运行在Windows上的项目，可以设置`false`取消此功能，把回车符记录在库中：
+$ git config --global core.autocrlf false
+
+
+#设置高亮配置
+git config --global color.ui true
+
+git config --global color.ui always
+
+
+
+-------------------------
+liguodong@WIN-0HGJ9QM2MEG ~
+$ ssh-keygen -t rsa -C "liguodongiot@163.com"
+
+
+#使用ssh-agent保存密码，避免每次上次都需要输入密码。
+liguodong@WIN-0HGJ9QM2MEG ~
+$ eval "$(ssh-agent -s)"
+Agent pid 632
+
+liguodong@WIN-0HGJ9QM2MEG ~
+$ ssh-add ~/.ssh/id_rsa
+Enter passphrase for /c/Users/Administrator/.ssh/id_rsa:
+Identity added: /c/Users/Administrator/.ssh/id_rsa (/c/Users/Administrator/.ssh/id_rsa)
+		
+#将ssh-key添加到github账户上去		
+
+#打开id_rsa.pub，并复制里面的内容到github上去
+liguodong@WIN-0HGJ9QM2MEG ~
+$ vim ~/.ssh/id_rsa.pub
+
+
+# 验证是否成功
+liguodong@WIN-0HGJ9QM2MEG ~
+$ ssh -T git@github.com
+Warning: Permanently added the RSA host key for IP address '192.30.252.129' to the list of known hosts.
+Hi liguodongIOT! You've successfully authenticated, but GitHub does not provide shell access.
+
+		
 ```
 
 </xmp>
 
-
-<!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
 <script src="../../strapdown/v0.2/strapdown.js"></script>
-<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
-
 </html>
 
 
