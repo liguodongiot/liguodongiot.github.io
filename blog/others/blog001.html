@@ -85,7 +85,7 @@ liguodong@WIN-0HGJ9QM2MEG ~
 $ ssh-keygen -t rsa -C "liguodongiot@163.com"
 
 
-#使用ssh-agent保存密码，避免每次上次都需要输入密码。
+#使用ssh-agent保存密码，避免每次上传都需要输入密码。
 liguodong@WIN-0HGJ9QM2MEG ~
 $ eval "$(ssh-agent -s)"
 Agent pid 632
@@ -101,6 +101,7 @@ Identity added: /c/Users/Administrator/.ssh/id_rsa (/c/Users/Administrator/.ssh/
 #打开id_rsa.pub，并复制里面的内容到github上去
 liguodong@WIN-0HGJ9QM2MEG ~
 $ vim ~/.ssh/id_rsa.pub
+
 
 
 # 验证是否成功
