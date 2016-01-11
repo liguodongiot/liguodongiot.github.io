@@ -5,6 +5,13 @@
 <title>Git常见命令</title>
 
 <xmp theme="Cerulean" style="display:none;">
+###查看帮助文档
+```
+git config --help
+git help config
+man git-config
+
+```
 
 ```
 #新的项目
@@ -51,14 +58,7 @@ $ cat .git/config
         fetch = +refs/heads/*:refs/remotes/origin/*
 
 
-#配置用户信息 设置了user.name和user.email对工作的产权很重要。
-liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
-$ git config --global user.name
-liguodong
 
-liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
-$ git config --global user.email
-liguodongiot@163.com	
 
 
 #设置行尾，以满足不同操作系统
@@ -79,17 +79,30 @@ git config --global color.ui true
 git config --global color.ui always
 
 
+git remote set-url origin  https://github.com/liguodongIOT/liguodongiot.github.io.git   
+	
 
--------------------------
+	
+#查看git版本，可以通过设置环境变量保证系统优先使用我们希望使用的git版本
+$ git --version
+git version 1.9.5.msysgit.1	
+
+
+
+```
+
+
+
+
+###windows环境下github免密码push（SSH方式）
+```
 liguodong@WIN-0HGJ9QM2MEG ~
 $ ssh-keygen -t rsa -C "liguodongiot@163.com"
-
 
 #使用ssh-agent保存密码，避免每次上传都需要输入密码。
 liguodong@WIN-0HGJ9QM2MEG ~
 $ eval "$(ssh-agent -s)"
 Agent pid 632
-
 
 liguodong@WIN-0HGJ9QM2MEG ~
 $ ssh-add ~/.ssh/id_rsa
@@ -102,16 +115,12 @@ Identity added: /c/Users/Administrator/.ssh/id_rsa (/c/Users/Administrator/.ssh/
 liguodong@WIN-0HGJ9QM2MEG ~
 $ vim ~/.ssh/id_rsa.pub
 
-
-
-
 # 验证是否成功
 liguodong@WIN-0HGJ9QM2MEG ~
 $ ssh -T git@github.com
 Warning: Permanently added the RSA host key for IP address '192.30.252.129' to the list of known hosts.
-Hi liguodongIOT! You've successfully authenticated, but GitHub does not provide shell access.
+Hi liguodongIOT! You have successfully authenticated, but GitHub does not provide shell access.
 
-	
 #查看当前推送方法
 liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
 $ git remote -v
@@ -120,16 +129,200 @@ liguodongiot@163.com    git@github.com:liguodongIOT/liguodongiot.github.io.git (
 origin  https://github.com/liguodongIOT/liguodongiot.github.io.git (fetch)
 origin  https://github.com/liguodongIOT/liguodongiot.github.io.git (push)
 
-
 修改将https改为ssh的方式
 git remote set-url origin git@github.com:liguodongIOT/liguodongiot.github.io.git
-
-
-
-
-git remote set-url origin  https://github.com/liguodongIOT/liguodongiot.github.io.git   
-	
 ```
+
+###TortoiseGit连接github免密码push（HTTPS方式）
+```
+当你配置好git后，在C:\Users\Administrator\目录下有一个.gitconfig的文件，
+里面会有你先前配好的name和email等信息，只需在末尾添加如下内容：
+
+[credential] 
+     helper = store 
+ 
+下次再输入用户名和密码时，git就会记住，
+从而在C:\Users\Administrator\目录下形成一个.git-credentials文件，
+里面就是保存的你的用户名和密码（注意是明文存储！！！）。
+
+这样以后再连接时，就不用再输入用户名和密码了！
+```
+
+###**git config基本操作**
+```
+#配置用户信息 设置了user.name和user.email对工作的产权很重要。
+$ git config --global user.name liguodong
+
+$ git config --global user.email liguodongiot@163.com
+
+$ git config --global user.name
+liguodong
+
+$ git config --global user.email
+liguodongiot@163.com
+
+#git config的三个级别 从高到低依次是local,global,system
+git config --system
+git config --global
+git config --local
+
+
+# 增删改查
+$ git config --global --add user.name test  #增加
+
+$ git config user.name #查到最新的数据
+test
+
+$ git config --get user.name	#查到最新的数据
+test
+
+$ git config --list --global
+user.name=liguodong
+user.email=liguodongiot@163.com
+user.name=test
+
+
+$ git config --global --unset user.name test #删除（有多个user.name时）
+$ git config --global --unset user.name  #删除（只有一个user.name时）
+
+$ git config --list --global
+user.name=liguodong
+user.email=liguodongiot@163.com
+
+$ git config --global user.name modifyName #修改 
+
+# 给git子命令取别名
+$ git config --global alias.co checkout #checkout取别名叫co
+
+$ git config --global alias.br branch
+
+$ git config --global alias.st status
+
+$ git config --global alias.ci commit
+
+
+$ git log  #查看日志，按 q 退出
+
+$ git config --global alias.lol "log --oneline" #取别名
+
+$ git lol
+
+```
+
+###查看帮助文档
+```
+git config --help
+git help config
+man git-config
+
+```
+
+###git远程协作的主要命令
+git clone，git fetch，git pull，git push
+```
+git clone支持如下几个协议：
+	ssh://[user@]host.xz[:port]/path/to/repo.git/
+	git://host.xz[:port]/path/to/repo.git/
+	http[s]://host.xz[:port]/path/to/repo.git/
+	ftp[s]://host.xz[:port]/path/to/repo.git/
+	rsync://host.xz/path/to/repo.git/
+
+	
+#克隆远程仓库数据到本地
+$ git clone https://github.com/liguodongIOT/Java.git
+
+
+#当远程仓库的数据更新之后，使用git fetch获取远程仓库最新的数据
+$ git fetch
+
+$ git log -- oneline --decorate --graph --all
+
+$ git merge origin/master  #将HEAD和master指针移动到最新的commit上面去
+
+$ git lol  #查看历史记录
+
+$ git pull #拉取服务器上面的最近数据（相当于git fetch 和 git merge同时操作）
+
+#编辑本地文件，并且提交
+$ git add test.txt
+
+$ git commit -m "test file"
+
+$ git push #推送到远程仓库
+
+
+# 在github上创建远程分支feacher
+$ git pull #获取最新的信息
+From https://github.com/liguodongIOT/Java
+ * [new branch]      feacher    -> origin/feacher
+Already up-to-date.
+
+
+$ git pull origin feacher	#只更新单独的分支
+From https://github.com/liguodongIOT/Java
+ * branch            feacher    -> FETCH_HEAD
+Already up-to-date.
+
+$ git fetch origin feacher #同样可以使用fetch
+
+$ git checkout v0		#先切换到v0分支
+$ git push origin master  	#再单独提交master分支
+
+# 在本地删除feature分支
+$ git branch -d feacher
+
+# 删除远程分支
+$ git push -delete origin feacher  #方式一
+
+```
+
+###git tag打标签
+标签可以针对某一时间点的版本做标记，常用于版本发布。
+```
+# 列出标签
+$ git tag 				# 在控制台打印出当前仓库的所有标签
+$ git tag -l 'v0.1.*' 	# 搜索符合模式的标签
+
+# 打标签
+git标签分为两种类型：轻量标签和附注标签。
+轻量标签是指向提交对象的引用，
+附注标签则是仓库中的一个独立对象。建议使用附注标签。
+
+# 创建轻量标签
+$ git tag v0.1.2-light
+
+# 创建附注标签
+$ git tag -a v0.1.3 -m "tag for v0"
+
+创建轻量标签不需要传递参数，直接指定标签名称即可。
+创建附注标签时，参数a即annotated的缩写，指定标签类型，
+后附标签名。参数m指定标签说明，说明信息会保存在标签对象中。
+
+
+# 删除标签
+误打或需要修改标签时，需要先将标签删除，再打新标签。
+$ git tag -d v0.1.2 	# 删除标签
+
+参数d即delete的缩写，意为删除其后指定的标签。
+
+# 给指定的commit打标签,打标签不必要在head之上，
+# 也可在之前的版本上打，这需要你知道某个提交对象的
+# 校验和（通过git log获取）。
+# 补打标签
+$ git tag -a v0.1.1 9fbc3d0
+
+# 标签发布
+# 通常的git push不会将标签对象提交到git服务器，
+# 我们需要进行显式的操作：
+$ git push origin v0.1.2 	# 将v0.1.2标签提交到git服务器
+$ git push origin –tags 	# 将本地所有标签一次性提交到git服务器
+
+
+
+```
+
+
+
 
 </xmp>
 
