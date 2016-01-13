@@ -2,7 +2,7 @@
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<title>Git常见命令</title>
+<title>Git与GitHub常见操作</title>
 
 <xmp theme="Cerulean" style="display:none;">
 ###查看帮助文档
@@ -12,86 +12,6 @@ git help config
 man git-config
 
 ```
-
-```
-#新的项目
-liguodong@WIN-0HGJ9QM2MEG /g/github
-$ git init projectExample
-Initialized empty Git repository in g:/github/projectExample/.git/
-
-liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
-$ pwd
-/g/github/projectExample
-
-
-liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
-$ ls -al  .git
-total 4
-drwxr-xr-x    9 liguodon Administ     4096 Jan 10 22:08 .
-drwxr-xr-x    3 liguodon Administ        0 Jan 10 22:08 ..
--rw-r--r--    1 liguodon Administ       23 Jan 10 22:08 HEAD
--rw-r--r--    1 liguodon Administ      157 Jan 10 22:08 config
--rw-r--r--    1 liguodon Administ       73 Jan 10 22:08 description
-drwxr-xr-x   11 liguodon Administ        0 Jan 10 22:08 hooks
-drwxr-xr-x    3 liguodon Administ        0 Jan 10 22:08 info
-drwxr-xr-x    4 liguodon Administ        0 Jan 10 22:08 objects
-drwxr-xr-x    4 liguodon Administ        0 Jan 10 22:08 refs
-
-
-#当需要与别人分享时
-liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
-$ git remote add origin https://github.com/liguodongwork/projectExample
-
-
-liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
-$ cat .git/config
-[core]
-        repositoryformatversion = 0
-        filemode = false
-        bare = false
-        logallrefupdates = true
-        symlinks = false
-        ignorecase = true
-        hideDotFiles = dotGitOnly
-[remote "origin"]
-        url = https://github.com/liguodongwork/projectExample
-        fetch = +refs/heads/*:refs/remotes/origin/*
-
-
-
-
-
-#设置行尾，以满足不同操作系统
-liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
-$ git config --global core.autocrlf true  	#Windows
-
-
-$ git config --global core.autocrlf input	#Linux，Mac
-
-
-如果你是Windows程序员，且正在开发仅运行在Windows上的项目，可以设置`false`取消此功能，把回车符记录在库中：
-$ git config --global core.autocrlf false
-
-
-#设置高亮配置
-git config --global color.ui true
-
-git config --global color.ui always
-
-
-git remote set-url origin  https://github.com/liguodongIOT/liguodongiot.github.io.git   
-	
-
-	
-#查看git版本，可以通过设置环境变量保证系统优先使用我们希望使用的git版本
-$ git --version
-git version 1.9.5.msysgit.1	
-
-
-
-```
-
-
 
 
 ###windows环境下github免密码push（SSH方式）
@@ -209,13 +129,357 @@ $ git lol
 
 ```
 
-###查看帮助文档
+###创建仓库以及提交基本操作
 ```
-git config --help
-git help config
-man git-config
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ git init git_non_dare_repo
+Initialized empty Git repository in g:/githubSource/testgit/git_non_dare_repo/.git/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ cd git_non_dare_repo/.git/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_non_dare_repo/.git (GIT_DIR!)
+$ ls
+HEAD  config  description  hooks  info  objects  refs
+
+-----------
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ git init --bare git_bare_repo
+Initialized empty Git repository in g:/githubSource/testgit/git_bare_repo/
+
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ cd git_bare_repo/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_bare_repo (BARE:master)
+$ ls
+HEAD  config  description  hooks  info  objects  refs
+
+------------
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ mkdir git_init_repo
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ cd git_init_repo/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_init_repo
+$ git init
+Initialized empty Git repository in g:/githubSource/testgit/git_init_repo/.git/
+
+
+# 克隆远程裸仓库
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ git clone git_bare_repo/ git_clone_repo/
+Cloning into 'git_clone_repo'...
+warning: You appear to have cloned an empty repository.
+done.
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ ls
+git_bare_repo  git_clone_repo  git_init_repo  git_non_dare_repo
+
+
+$ git clone https://github.com/liguodongIOT/Java.git
+
+
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ git init git_basics
+Initialized empty Git repository in g:/githubSource/testgit/git_basics/.git/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ cd git_basics/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ touch a
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ touch b
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git add a b #添加a，b两个文件到暂存区
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git status
+On branch master
+
+Initial commit
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+        new file:   a
+        new file:   b
+
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git commit -m "Initial commit" #提交到历史记录
+[master (root-commit) 224c3bc] Initial commit
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 a
+ create mode 100644 b
+
+
+# 修改了文件a
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ vim a
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ cat a
+aaa
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   a
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git commit -m "modify a"
+On branch master
+Changes not staged for commit:
+        modified:   a
+
+no changes added to commit
+
+
+# 删除工作区和暂存区的文件
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git rm -f a
+rm 'a'
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ ls
+b
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        deleted:    a
+
+
+# 还原
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git reset HEAD a
+Unstaged changes after reset:
+D       a
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ ls
+b
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git checkout a
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ ls
+a  b
+
+
+# 只删除暂存区的文件
+$ git rm --cached a
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_basics (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        deleted:    a
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        a
+
+
+		
+$ git add a	#添加回暂存区
+
+
+# 重命名
+git mv a c
+git status
+
+mv c a
+git status
+git add a c 
+git status
+
+
+git mv a c <==> mv a c 与 git add a c 
+
+git add . 与 git add -A 将整个工作区添加到暂存区
+
+
+# 如果我们不想添加工作区某些文件或者目录
+# 可以通过在工作区新建一个.gitignore文件
+# 我们可以根据项目的需要通过该文件进行限制。
+
+git add .gitignore
+git commit -m "add ignore" #添加进仓库用于整个仓库的共享
 
 ```
+
+
+
+
+---
+
+###git本地分支与合并
+```
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ git init git_checkout_merge
+Initialized empty Git repository in g:/githubSource/testgit/git_checkout_merge/.git/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
+$ cd git_checkout_merge/
+
+#增加第一次提交
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ vim master.txt
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git add .
+The file will have its original line endings in your working directory.
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git commit -m "init commit on master"
+[master (root-commit) 9e797e4] init commit on master
+warning: CRLF will be replaced by LF in master.txt.
+The file will have its original line endings in your working directory.
+ 1 file changed, 2 insertions(+)
+ create mode 100644 master.txt
+
+ #增加第二次提交
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ vim master.txt
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git add .
+The file will have its original line endings in your working directory.
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git commit -m "second commit on master"
+The file will have its original line endings in your working directory.
+ 1 file changed, 1 insertion(+)
+
+# 当我们有一些其他的工作，不想在master分支直接操作，可以新建一个其他分支进行操作
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git branch test
+
+#切换到test分支
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git checkout test
+Switched to branch 'test'
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (test)
+$ vim master.txt
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (test)
+$ touch test.txt
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (test)
+$ git add .
+The file will have its original line endings in your working directory.
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (test)
+$ git commit -m "Init commit on test"
+The file will have its original line endings in your working directory.
+ 2 files changed, 1 insertion(+)
+ create mode 100644 test.txt
+
+# 切换到master分支之后，发现test分支增加的内容，并没有在master分支出现
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (test)
+$ git checkout master
+Switched to branch 'master'
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ ls
+master.txt
+
+# 查看历史记录
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git log --oneline --decorate --graph --all
+* 3bedb7f (test) Init commit on test
+* 749e699 (HEAD, master) second commit on master
+* 9e797e4 init commit on master
+
+# 对master上的第一个提交做一个轻量级的tag
+#如果不指定hash值，它默认是当前指向的commit（即head指向的master分支上的commit）
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git tag "v0" 9e797e4
+
+
+# 创建附注标签
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git tag -a "INITIAL_COMMIT" 9e797e4
+
+
+# 查看标签
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git tag
+INITIAL_COMMIT
+v0
+
+#查看历史示意图
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git log --oneline --decorate --graph --all
+* 3bedb7f (test) Init commit on test
+* 749e699 (HEAD, master) second commit on master
+* 9e797e4 (tag: v0, tag: INITIAL_COMMIT) init commit on master
+
+#取别名
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git config --global alias.lol "log --oneline --decorate --graph --all"
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git lol
+* 3bedb7f (test) Init commit on test
+* 749e699 (HEAD, master) second commit on master
+* 9e797e4 (tag: v0, tag: INITIAL_COMMIT) init commit on master
+
+```
+![](image/0005.jpg)
+
+![](image/0006.jpg)
+
+![](image/0007.jpg)
+
+![](image/0008.jpg)
+
+![](image/0009.jpg)
+
+![](image/0010.jpg)
+
+![](image/0011.jpg)
+
+![](image/0012.jpg)
+
+![](image/0013.jpg)
+
+![](image/0014.jpg)
+
+![](image/0015.jpg)
+
+![](image/0016.jpg)
+![](image/0017.jpg)
+![](image/0018.jpg)
+
+![](image/0019.jpg)
+![](image/0020.jpg)
+![](image/0021.jpg)
+---
 
 ###git远程协作的主要命令
 git clone，git fetch，git pull，git push
@@ -274,6 +538,9 @@ $ git branch -d feacher
 # 删除远程分支
 $ git push -delete origin feacher  #方式一
 
+
+$ git push origin :feacher  #方式二 以一个空的分支替代远程仓库的feacher分支
+
 ```
 
 ###git tag打标签
@@ -322,6 +589,147 @@ $ git push origin –tags 	# 将本地所有标签一次性提交到git服务器
 ```
 
 
+
+
+
+
+
+
+
+
+
+```
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource
+$ git clone https://github.com/liguodongIOT/GitHubStudyTest.git
+Cloning into 'GitHubStudyTest'...
+remote: Counting objects: 3, done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+Checking connectivity... done.
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource
+$ cd GitHubStudyTest/
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/GitHubStudyTest (master)
+$ git checkout -b feacher		#切换分支
+Switched to a new branch 'feacher'
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/GitHubStudyTest (feacher)
+$ vim Demo.txt
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/GitHubStudyTest (feacher)
+$ cat Demo.txt
+This is a GitHub test...
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/GitHubStudyTest (feacher)
+$ git add Demo.txt
+The file will have its original line endings in your working directory.
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/GitHubStudyTest (feacher)
+$ git commit -m "add some feacher"
+[feacher 187b8a1] add some feacher
+The file will have its original line endings in your working directory.
+ 1 file changed, 1 insertion(+)
+ create mode 100644 Demo.txt
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/GitHubStudyTest (feacher)
+$ git push origin feacher #将feacher分支推送到GitHubStudyTest项目下
+Counting objects: 4, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 297 bytes | 0 bytes/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To https://github.com/liguodongIOT/GitHubStudyTest.git
+   7faaf33..187b8a1  feacher -> feacher
+
+   
+   
+```
+
+
+
+
+```
+#查看git版本，可以通过设置环境变量保证系统优先使用我们希望使用的git版本
+$ git --version
+git version 1.9.5.msysgit.1	
+
+```
+
+```
+#新的项目
+liguodong@WIN-0HGJ9QM2MEG /g/github
+$ git init projectExample
+Initialized empty Git repository in g:/github/projectExample/.git/
+
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ pwd
+/g/github/projectExample
+
+
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ ls -al  .git
+total 4
+drwxr-xr-x    9 liguodon Administ     4096 Jan 10 22:08 .
+drwxr-xr-x    3 liguodon Administ        0 Jan 10 22:08 ..
+-rw-r--r--    1 liguodon Administ       23 Jan 10 22:08 HEAD
+-rw-r--r--    1 liguodon Administ      157 Jan 10 22:08 config
+-rw-r--r--    1 liguodon Administ       73 Jan 10 22:08 description
+drwxr-xr-x   11 liguodon Administ        0 Jan 10 22:08 hooks
+drwxr-xr-x    3 liguodon Administ        0 Jan 10 22:08 info
+drwxr-xr-x    4 liguodon Administ        0 Jan 10 22:08 objects
+drwxr-xr-x    4 liguodon Administ        0 Jan 10 22:08 refs
+
+
+#当需要与别人分享时
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ git remote add origin https://github.com/liguodongwork/projectExample
+
+
+liguodong@WIN-0HGJ9QM2MEG /g/github/projectExample (master)
+$ cat .git/config
+[core]
+        repositoryformatversion = 0
+        filemode = false
+        bare = false
+        logallrefupdates = true
+        symlinks = false
+        ignorecase = true
+        hideDotFiles = dotGitOnly
+[remote "origin"]
+        url = https://github.com/liguodongwork/projectExample
+        fetch = +refs/heads/*:refs/remotes/origin/*
+
+
+
+
+
+#设置行尾，以满足不同操作系统
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/liguodongiot.github.io (master)
+$ git config --global core.autocrlf true  	#Windows
+
+
+$ git config --global core.autocrlf input	#Linux，Mac
+
+
+如果你是Windows程序员，且正在开发仅运行在Windows上的项目，可以设置`false`取消此功能，把回车符记录在库中：
+$ git config --global core.autocrlf false
+
+
+#设置高亮配置
+git config --global color.ui true
+
+git config --global color.ui always
+
+
+git remote set-url origin  https://github.com/liguodongIOT/liguodongiot.github.io.git   
+	
+
+	
+
+
+
+```
 
 
 </xmp>
