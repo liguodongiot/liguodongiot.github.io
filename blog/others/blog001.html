@@ -130,6 +130,11 @@ $ git lol
 ```
 
 ###创建仓库以及提交基本操作
+
+> **git init, git clone**
+
+> **git add, git commit,git status,git rm,git mv, .gitignore**
+
 ```
 liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
 $ git init git_non_dare_repo
@@ -337,6 +342,9 @@ git commit -m "add ignore" #添加进仓库用于整个仓库的共享
 ---
 
 ###git本地分支与合并
+
+> **git branch, git tag, git checkout, git stash, git merge**
+
 ```
 liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit
 $ git init git_checkout_merge
@@ -480,6 +488,185 @@ $ git lol
 ![](image/0020.jpg)
 ![](image/0021.jpg)
 ---
+
+
+### 查看与对比历史记录
+> **git show, git log, git diff**
+
+```
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git log --oneline --decorate --graph --all
+*   d2dfb67 (HEAD, master) Merge branch 'test'
+|\
+| * 3bedb7f (test) Init commit on test
+* | 13166b8 (test_merge) Init commit on test_merge
+|/
+* 749e699 second commit on master
+| *   d030259 (refs/stash) WIP on fix_v0: 9e797e4 init commit on master
+| |\
+|/ /
+| * 6f05194 index on fix_v0: 9e797e4 init commit on master
+|/
+* 9e797e4 (tag: v0, tag: INITIAL_COMMIT, fix_v0) init commit on master
+
+git show HEAD   #等价于git show master 或 git show d2dfb67
+
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git show master
+commit d2dfb672e91922024ad27eda83514b1b5adcf54b
+Merge: 13166b8 3bedb7f
+Author: liguodong <liguodongiot@163.com>
+Date:   Wed Jan 13 10:19:04 2016 +0800
+
+    Merge branch 'test'
+
+    Conflicts:
+        master.txt
+
+diff --cc master.txt
+index 5babf0f,b331fa2..423afd4
+--- a/master.txt
++++ b/master.txt
+@@@ -1,4 -1,4 +1,5 @@@
+  liguodong hadoop
+  mark flink spark
+  second commit
+ +Init commit on test_merge
++ init test commit
+
+
+git show master^ #表示master指向的第一父提交  或者 git show master~
+git show master^2 #表示master指向的第二父提交
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git show master^2
+commit 3bedb7f03ee10156bfc7abfa4099fd7c614e4f67
+Author: liguodong <liguodongiot@163.com>
+Date:   Tue Jan 12 19:58:23 2016 +0800
+
+    Init commit on test
+
+diff --git a/master.txt b/master.txt
+index d1c2462..b331fa2 100644
+--- a/master.txt
++++ b/master.txt
+@@ -1,3 +1,4 @@
+ liguodong hadoop
+ mark flink spark
+ second commit
++init test commit
+diff --git a/test.txt b/test.txt
+new file mode 100644
+index 0000000..e69de29
+
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git show --oneline master^2
+3bedb7f Init commit on test
+diff --git a/master.txt b/master.txt
+index d1c2462..b331fa2 100644
+--- a/master.txt
++++ b/master.txt
+@@ -1,3 +1,4 @@
+ liguodong hadoop
+ mark flink spark
+ second commit
++init test commit
+diff --git a/test.txt b/test.txt
+new file mode 100644
+index 0000000..e69de29
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git show --oneline --stat master^2
+3bedb7f Init commit on test
+ master.txt | 1 +
+ test.txt   | 0
+ 2 files changed, 1 insertion(+)
+ 
+ 
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git show --format=%T master^2
+c1785ed057fb0bbd7e30bcb9365a4af661869766
+
+diff --git a/master.txt b/master.txt
+index d1c2462..b331fa2 100644
+--- a/master.txt
++++ b/master.txt
+@@ -1,3 +1,4 @@
+ liguodong hadoop
+ mark flink spark
+ second commit
++init test commit
+diff --git a/test.txt b/test.txt
+new file mode 100644
+index 0000000..e69de29 
+ 
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git show d1c2462
+liguodong hadoop
+mark flink spark
+second commit
+
+liguodong@WIN-0HGJ9QM2MEG /g/githubSource/testgit/git_checkout_merge (master)
+$ git show b331fa2
+liguodong hadoop
+mark flink spark
+second commit
+init test commit
+
+
+$ git log #显示完整信息 f向上翻页 b向下翻页 q退出 
+
+$ git log -p #输出每一个commit之间的差异信息
+
+$ git log --stat #输出每一个commit之间差异的统计信息
+
+$ git log --oneline	#输出单行信息
+
+$ git log --oneline --stat -p #输出单行信息的差异
+
+$ git log --oneline --decorate --graph --all
+
+
+
+$ git diff 		#工作区与暂存区的差异
+```
+
+![](image/0023.jpg)
+```
+$ git diff --cached 		#查看暂存区与历史的差异
+
+#当前工作区与其他历史文件的差异
+$ git diff HEAD~2 -- master.txt
+
+#暂存区与历史文件的差异
+$ git diff --cached HEAD~2
+
+
+#两个commit之间的差异
+$ git diff HEAD HEAD~2
+
+#可以指定某个文件在两个commit之间的差异
+$ git diff HEAD HEAD~2 -- master.txt
+
+```
+![](image/0024.jpg)
+
+---
+
+###撤销与修改操作
+
+> **git checkout, git reset, git clean, git revert**
+
+```
+# 当内容被修改，还没有添加进暂存区的时候
+git checkout -- master.txt #撤销某个文件修改，实际上是将暂存区覆盖工作区
+
+# 当被修改的文件添加进暂存区，还没有被提交。
+git reset master.txt  #此时暂存区的内容就会被撤销。
+
+```
 
 ###git远程协作的主要命令
 git clone，git fetch，git pull，git push

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>IDEA14中使用Git与GitHub等相关操作</title>
+
+<xmp theme="Cerulean" style="display:none;">
+
+###一、下载与安装Git（省略）
+
+###二、配置IDEA
+1、新建一个工程，打开设置面板，点击左边功能面板列表中的Version Control(版本控制)。
+
+2、点击Git进行配置，这里面有许多配置，其实基本按照默认的就行了,
+无需做其他更多的操作。 在Path to Git executable一栏,
+选择刚才安装的git路径下bin\git.exe，然后点击后面的Test按钮,如果配置成功会看到如下界面： 
+![](image/b002-002.jpg)
+
+3、点击GitHub进行配置（本文默认你已经拥有了一个github账号,如果没有，请先注册。) ，
+然后在Host一栏填写github的地址: github.com ；
+在 Login 一栏填写你的github 账号；
+在 Password 一栏填写密码。
+填写完成后点击Test按钮，此时 IDEA 会根据你填写的内容远程访问github社区，
+如果账号和密码输入正确会提示你链接成功。
+
+
+![](image/b002-003.jpg)
+
+
+###三、本地仓库
+1、创建本地仓库，在IDEA的菜单栏中选择VCS，选择Import into Version Control (引入到版本控制)
+ --> Create Git Repository... -->选择一个存放的路径(本文为:I:\workspace\NCPlatform)--> OK。
+这样就创建了一个本地仓库，以后代码的本地提交(Commit)的内容都会更新到这个选择的路径中。
+
+![](image/b002-004.jpg)
+
+2、提交到本地仓库
+
+方式一
+```
+$ cd JavaFrames/
+$ git add .
+$ git commit -m "init"
+```
+
+方式二
+
+在IDEA中，选中项目(或者文件)右键选择Git--->Add (此时没任何反应)---->commit(提交)  
+注意:一定要先add，再提交，此时项目文件就添加到本地仓库了。
+
+###四、远程仓库
+1、在github上创建一个仓库 : 登陆你的github -->点击你的用户名 
+-->选择Repositories--> 点击绿色-->输入你的仓库名称 (此时远程仓库创建完成) 
+
+![](image/b002-001.jpg)
+
+2、通过Git shell 配置远程仓库
+```
+# 进入到项目目录
+$ cd JavaFrames/
+
+$ git remote add origin https://github.com/liguodongIOT/JavaFrames.git
+
+# 解释:该脚本将本地的master 推到刚才设置的github远程仓库中)   
+# 如果执行完成2条脚本,没有任何提示,也没任何错误,恭喜你成功了!   
+$ git push -u origin master
+
+```
+
+3、回到IDEA，选择项目 -->Git -->Repository -->Push。  
+即可将本地的文件推送到远程仓库中，然后刷新你的github仓库你就会看到 
+你提交的本地内容了,同时你在IDEA中也能看到你的操作信息。 
+
+
+
+</xmp>
+
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
