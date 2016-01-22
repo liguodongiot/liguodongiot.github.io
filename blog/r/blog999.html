@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>R语言临时笔记</title>
+
+<xmp theme="Cerulean" style="display:none;">
+**R的用途**
+
+探索性数据分析
+
+统计推断
+
+回归分析
+
+机器学习
+
+
+
+**包（Pachage）：扩展R基本功能的机制/集成了众多函数。**
+
+资源来自
+CRAN
+
+（
+
+安装函数 --> install.packages("要安装的包名") 
+
+eg:要安装机器学习的caret包--> `install.packages("caret")`
+
+加载catet包--> `library(caret)`  ，然后才能调用包中的函数。
+
+`data()`  		显示包的详细信息，能查到其中包括的函数。
+
+`?InsectSparys` 	更为详细的包的信息,比如某个数据集。
+
+）、
+
+Bioconductor（安装函数：install_github()）、
+
+GitHub等
+
+
+
+##数据结构
+###对象的5种基本类型
+字符，数值，整型，字符，复数
+
+```
+> x <- 3.14
+> class(x)
+[1] "numeric"
+
+> x <- 5
+> class(x)
+[1] "numeric"
+
+> x <- 6L
+> class(x)
+[1] "integer"
+
+> y <- "hello,R!!!"
+> class(y)
+[1] "character"
+
+> t <- FALSE
+> class(t)
+[1] "logical"
+
+> x <- 1+2i
+> class(x)
+[1] "complex"
+
+```
+###属性
+名称，维度，类型，长度
+
+###向量
+只能包含同一类型的对象。
+```
+# Vector 
+
+yyy <- vector("character",length = 10) # 创建一个长度为10的字符型向量
+
+x1 <- 1:4
+
+ccc <- c(1,2,3,4,5)
+
+x <- c("a","b","v")
+as.numeric(x)  # 强制将字符转换成数字
+
+# as.logical(...)
+# as.character(...)
+
+class(x1)
+names(x1) <- c("a","b","c","d") #给向量添加名称
+print(x1)
+```
+
+
+
+
+
+
+</xmp>
+
+
+<!--<script src="http://cdn.ztx.io/strapdown/strapdown.min.js"></script>-->
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
