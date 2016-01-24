@@ -36,85 +36,37 @@
   <article>
     <h2 class="about_h">您现在的位置是：<a href="../index.html">首页</a>>
 	<a href="../blog.html">酷博客</a>>
-	<a href="./r.html">R</a>
+	<a href="./hive.html">hive</a>
 	</h2>
      <div class="bloglist">
  
-		 <div class="bloglist">
-	 
-	 	 <div class="newblog">
+	 <div class="newblog">
         <ul>
-          <h3><a href="./others/blogContentOthers003.html">Maven相关操作</a></h3>
+          <h3><a href="./hive/blogContentHive001.html">Ubuntu14.04环境Hadoop2.6.0下安装Hive1.2.1</a></h3>
           <div class="autor"><span>作者：冬果</span>
-		  <span>文章分类：[<a href="./others.html">Others</a>]</span>
+		  <span>文章分类：[<a href="./hive.html">Hive</a>]</span>
 		  <span>创作类型：[<a >原创</a>]</span>
 		  </div>
           <p>
-			一、下载并安装
+			安装Hadoop（略）
+			安装mysql（略）
 
-			二、配置环境变量
+			启动mysql
 
-			MAVEN_HOME/bin
+			mysql -uroot -p
 
-			查看版本信息：mvn -version
+			//想myuser使用mypassword从任何主机连接到mysql服务器
+			grant all privileges on *.* to myuser@'%' identified by 'mypassword' with grant option;
 
-			进入项目根目录，输入 mvn compile 
-		  <a href="./others/blogContentOthers003.html" target="_blank" class="readmore">全文</a>
+			//创建Hive数据库
+
+		  <a href="./hive/blogContentHive001.html" target="_blank" class="readmore">全文</a>
 		  </p>
         </ul>
-        <figure><img src="../images/rectangle/034.jpg" ></figure>
-        <div class="dateview">2016-01-22</div>
-      </div>
- 
- 
- 
- 
-		<div class="newblog">
-        <ul>
-          <h3><a href="./others/blogContentOthers002.html">IDEA14中使用Git与GitHub等相关操作</a></h3>
-          <div class="autor"><span>作者：冬果</span>
-		  <span>文章分类：[<a href="./others.html">Others</a>]</span>
-		  <span>创作类型：[<a >原创</a>]</span>
-		  </div>
-          <p>
-			一、下载与安装Git（省略）
-
-			二、配置IDEA
-
-			1、新建一个工程，打开设置面板，点击左边功能面板列表中的Version Control(版本控制)。
-
-			2、点击Git进行配置，这里面有许多配置，其实基本按照默认的就行了, 
-			无需做其他更多的操作。
-		  <a href="./others/blogContentOthers002.html" target="_blank" class="readmore">全文</a>
-		  </p>
-        </ul>
-        <figure><img src="../images/rectangle/035.jpg" ></figure>
-        <div class="dateview">2016-01-13</div>
-      </div>
-	 
-	 
-	 
-	<div class="newblog">
-        <ul>
-          <h3><a href="./others/blogContentOthers001.html">Git与GitHub常见操作</a></h3>
-          <div class="autor"><span>作者：冬果</span>
-		  <span>文章分类：[<a href="./others.html">Others</a>]</span>
-		  <span>创作类型：[<a >原创</a>]</span>
-		  </div>
-          <p>
-			查看帮助文档
-			git config --help
-			git help config
-			man git-config
-			windows环境下github免密码push（SSH方式）
-			liguodong@WIN-0HGJ9QM2MEG ~
-			$ ssh-keygen -t rsa -C "liguodongiot@163.com"	
-		  <a href="./others/blogContentOthers001.html" target="_blank" class="readmore">全文</a>
-		  </p>
-        </ul>
-        <figure><img src="../images/rectangle/036.jpg" ></figure>
-        <div class="dateview">2016-01-12</div>
-      </div>
+        <figure><img src="../images/rectangle/025.jpg" ></figure>
+        <div class="dateview">2015-01-06</div>
+      </div>	 
+	 	 
 
 	 	  
     </div>  
@@ -134,16 +86,16 @@
   
   <aside>
 	<div class="rnav">
-	  <li class="rnav2 "><a href="./blog/scala.html"><b>Scala</b></a></li>
-	  <li class="rnav2 "><a href="./blog/linux.html"><b>Linux</b></a></li>
-	  <li class="rnav2 "><a href="./blog/hadoop.html"><b>Hadoop</b></a></li>
-	  <li class="rnav2 "><a href="./blog/spark.html"><b>Spark</b></a></li>
-	  <li class="rnav2 "><a href="./blog/hive.html"><b>Hive</b></a></li>
-	  <li class="rnav2 "><a href="./blog/flink.html"><b>Flink</b></a></li>
+	  <li class="rnav2 "><a href="./scala.html"><b>Scala</b></a></li>
+	  <li class="rnav2 "><a href="./linux.html"><b>Linux</b></a></li>
+	  <li class="rnav2 "><a href="./hadoop.html"><b>Hadoop</b></a></li>
+	  <li class="rnav2 "><a href="./spark.html"><b>Spark</b></a></li>
+	  <li class="rnav2 " id="yellow_topnav_current"><a href="./hive.html"><b>Hive</b></a></li>
+	  <li class="rnav2 "><a href="./flink.html"><b>Flink</b></a></li>
 	  <li class="rnav2 "><a href="./r.html"><b>R</b></a></li>
-	  <li class="rnav2 "><a href="./blog/designPattern.html"><b>Design Pattern</b></a></li>
-	  <li class="rnav2 "><a href="./blog/investment.html"><b>Investment</b></a></li>
-	  <li class="rnav2 " id="yellow_topnav_current"><a href="./others.html"><b>Others</b></a></li>
+	  <li class="rnav2 "><a href="./designPattern.html"><b>Design Pattern</b></a></li>
+	  <li class="rnav2 "><a href="./investment.html"><b>Investment</b></a></li>
+	  <li class="rnav2 " ><a href="./others.html"><b>Others</b></a></li>
 	</div>
 	
 	

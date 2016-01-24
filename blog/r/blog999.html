@@ -97,9 +97,138 @@ names(x1) <- c("a","b","c","d") #给向量添加名称
 print(x1)
 ```
 
+###矩阵
+向量+维度属性（整数向量:nrow,ncol）
+```
+# Matrix 
+
+x <- matrix(nrow = 3, ncol = 2)
+x
+
+# 矩阵在填充时，是按照列进行填充的
+x <- matrix(1:6,nrow = 3, ncol = 2)
+x
+dim(x)
+attributes(x) # 矩阵属性
+
+# 向量变矩阵
+y <- 1:6
+dim(y) <- c(2,3)
+y
 
 
+# 矩阵的拼接
 
+y2 <- matrix(1:6, nrow=2,ncol=3)
+
+#行拼接
+y3 <- rbind(y,y2)
+y3
+
+#列拼接
+y4 <- cbind(y,y2)
+y4
+
+```
+
+###数组
+与矩阵类似，但是维度可以大于2
+
+```
+# Array
+x <- array(1:24,dim = c(4,6))
+x
+
+# 3个维度
+x <- array(1:24,dim = c(2,3,4))
+x
+
+```
+
+###列表
+可以包含不同类型的对象。
+
+```
+# list
+
+z <- list("a", 2, 20L, 3+4i, TRUE)
+z
+
+
+z2 <- list(a=1,b=2,c=3)
+z2
+
+
+z3 <- list(c(1,2,3),c(4,5,6,7))
+z3
+
+
+x <- matrix(1:6,nrow=2, ncol=3)
+x
+
+# 每一列每一行命名
+dimnames(x) <- list(c("a","b"),c("c","d","e"))
+x
+
+```
+
+
+# 因子
+分类数据（有序 vs. 无序）
+可以理解为 整数向量+标签（优于整数向量）
+Male/Female vs. 1/2
+常用于lm()，glm()
+
+```
+> # factor
+> x <- factor(c("female","female","male","male","female"))
+> x
+[1] female female male   male   female
+Levels: female male
+
+> y <- factor(c("female","female","male","male","female"), levels = c("male","female"))
+> y
+[1] female female male   male   female
+Levels: male female
+
+> table(x)
+x
+female   male 
+     3      2 
+> table(y)
+y
+  male female 
+     2      3 
+
+> unclass(x)
+[1] 1 1 2 2 1
+attr(,"levels")
+[1] "female" "male"  
+> class(unclass(x))
+[1] "integer"
+```
+
+###缺失值
+NA/NaN
+NaN属于NA
+NA不属于NaN
+
+NaN一般用来表示数字的缺失值
+NA可以表示数字，字符等缺失值
+
+判断向量中是否有缺失值：is.na()、is.nan()
+```
+> x <- c(1,NA,2,NA,3)
+> is.na(x)
+[1] FALSE  TRUE FALSE  TRUE FALSE
+> is.nan(x)
+[1] FALSE FALSE FALSE FALSE FALSE
+> y <- c(1,NaN,2,NaN,3)
+> is.na(y)
+[1] FALSE  TRUE FALSE  TRUE FALSE
+> is.nan(y)
+[1] FALSE  TRUE FALSE  TRUE FALSE
+```
 
 
 </xmp>
