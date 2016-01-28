@@ -230,6 +230,437 @@ NA可以表示数字，字符等缺失值
 [1] FALSE  TRUE FALSE  TRUE FALSE
 ```
 
+###数据框
+存储表格数据
+视为各元素长度相等的列表
+--每个元素代表一列数据
+--每个元素的长度代表行数
+--元素类型可以不同
+
+```
+> df <- data.frame(id = c(1,2,3,4,5), 
++                  name = c("a","b","c","d","e"),
++                  gender = c(TRUE,TRUE,FALSE,FALSE,TRUE))
+
+> df
+  id name gender
+1  1    a   TRUE
+2  2    b   TRUE
+3  3    c  FALSE
+4  4    d  FALSE
+5  5    e   TRUE
+
+> nrow(df)
+[1] 5
+> ncol(df)
+[1] 3
+
+
+> df2 <- data.frame(id = c(1,2,3,4),score = c(90,66,75,43))
+> df2
+  id score
+1  1    90
+2  2    66
+3  3    75
+4  4    43
+> m <- data.matrix(df2)  #数据框转化为矩阵
+> m
+     id score
+[1,]  1    90
+[2,]  2    66
+[3,]  3    75
+[4,]  4    43
+
+
+```
+
+###日期和时间
+日期：Date
+距离1970-01-91的天数 date()/ Sys.Date()
+weekdays()/months()/quarters()
+
+时间：POSIXct、POSIXlt
+距离1970-01-91的秒数 Sys,time()
+POSIXct:整数，常用语存入数据框
+POSIXlt:列表，还包含星期，年，月，日等信息
+
+```
+# date and time
+x <- date()
+x
+class(x)
+x2 <- Sys.Date()
+class(x2)
+
+x3 <- as.Date("2015-01-01")
+x3
+class(x3)
+weekdays(x3)
+months(x3)
+quarters(x3)  #季度
+julian(x3) #当前距离1970-01-01有多少天
+
+x4 <- as.Date("2016-01-01")
+x4-x3
+as.numeric(x4-x3)
+
+
+x <- Sys.time()
+x
+class(x)
+
+p <- as.POSIXlt(x)
+class(p)
+names(unclass(p))
+p$sec #获取秒
+
+d <- as.POSIXlt(p)
+class(d)
+
+x1 <- "Jan 1, 2015 01:01"
+strptime(x1, "%B %d, %Y %H:%M")
+
+```
+
+##数据操作
+###构建子集
+
+原始数据——>预处理后的数据
+
+基本方法
+-- []:提取一个或多个类型相同的元素
+-- [[]]:从列表或数据框中提取元素
+-- $:按名字从列表或数据框中提取元素
+
+R语言数据下标是从1开始的。
+
+```
+> #构建子集
+> x <- 1:10
+> x[1]
+[1] 1
+> x[1:5]
+[1] 1 2 3 4 5
+> x[6:10]
+[1]  6  7  8  9 10
+> x[x>5]
+[1]  6  7  8  9 10
+> x>5
+ [1] FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+
+ 
+> x[x>5 & x<7]
+[1] 6
+> x[x<3 | x>7]
+[1]  1  2  8  9 10
+> y <- 1:4
+> y
+[1] 1 2 3 4
+> 
+> names(y) <- c("a","b","c","d")
+> y
+a b c d 
+1 2 3 4 
+> 
+> y[2]
+b 
+2 
+> y["b"]
+b 
+2  
+
+
+> # 矩阵子集
+> x <- matrix(1:6,nrow=2,ncol=3)
+> x
+     [,1] [,2] [,3]
+[1,]    1    3    5
+[2,]    2    4    6
+> 
+> x[1,2]
+[1] 3
+> x[2,3]
+[1] 6
+> x[1,]
+[1] 1 3 5
+> x[,1]
+[1] 1 2
+> x[2,c(1,3)]
+[1] 2 6
+> class(x[1,2])
+[1] "integer"
+> x[1,2,drop = FALSE] # drop = FALSE关掉了返回向量，返回是一个矩阵
+     [,1]
+[1,]    3
+
+
+> # 构建数据框的子集
+> x <- data.frame(v1=1:5, v2=6:10, v3=11:15)
+> x
+  v1 v2 v3
+1  1  6 11
+2  2  7 12
+3  3  8 13
+4  4  9 14
+5  5 10 15
+> 
+> x$v3[c(2,4)] <- NA
+> x
+  v1 v2 v3
+1  1  6 11
+2  2  7 NA
+3  3  8 13
+4  4  9 NA
+5  5 10 15
+> 
+> x[,2]
+[1]  6  7  8  9 10
+> x[,"v2"]
+[1]  6  7  8  9 10
+> 
+> x[(x$v1<4 & x$v2<8),]
+  v1 v2 v3
+1  1  6 11
+2  2  7 NA
+> 
+> x[x$v1>2,]
+  v1 v2 v3
+3  3  8 13
+4  4  9 NA
+5  5 10 15
+> 
+> x[which(x$v1>2),]
+  v1 v2 v3
+3  3  8 13
+4  4  9 NA
+5  5 10 15
+
+> which(x$v1>2) #返回下标
+[1] 3 4 5
+> 
+> x$v1>2 #返回真假
+[1] FALSE FALSE  TRUE  TRUE  TRUE
+
+> subset(x,x$v1>2)
+  v1 v2 v3
+3  3  8 13
+4  4  9 NA
+5  5 10 15
+
+
+# 列表的子集
+- [[]] / $ / [[]][] / [[]][[]]
+- 嵌套列表 / 不完全匹配(partial matching)
+
+> x <- list(id=1:4,height=170,gender="male")
+> 
+> x[1]
+$id
+[1] 1 2 3 4
+
+> x["id"]
+$id
+[1] 1 2 3 4
+
+> 
+> x[[1]]
+[1] 1 2 3 4
+> x[["id"]]
+[1] 1 2 3 4
+> x$id
+[1] 1 2 3 4
+> x[c(1,3)]
+$id
+[1] 1 2 3 4
+
+$gender
+[1] "male"
+
+> y <- "id"
+> x[[y]]
+[1] 1 2 3 4
+> x[["id"]]
+[1] 1 2 3 4
+> x$y	#$符号，只能引用名字，不能引用包含了名字的变量
+NULL
+> x$id
+[1] 1 2 3 4
+
+> # 从列表中获取嵌套的元素
+> x <- list(a = list(1,2,3,4), b = c("Monday","Tuesday"))
+> x
+$a
+$a[[1]]
+[1] 1
+
+$a[[2]]
+[1] 2
+
+$a[[3]]
+[1] 3
+
+$a[[4]]
+[1] 4
+
+
+$b
+[1] "Monday"  "Tuesday"
+
+> x[[1]]
+[[1]]
+[1] 1
+
+[[2]]
+[1] 2
+
+[[3]]
+[1] 3
+
+[[4]]
+[1] 4
+
+> x[[1]][[2]]
+[1] 2
+
+> x[[c(1,3)]]
+[1] 3
+
+> x[[c(2,2)]]
+[1] "Tuesday"
+> x[[1]][[2]] #子列表第二个元素的内容
+[1] 2
+ 
+> x[[1]][2] #子列表第二个元素
+[[1]]
+[1] 2
+
+> x[[c(1,3)]]
+[1] 3
+
+> x[[c(2,2)]]
+[1] "Tuesday"
+
+# 不完全匹配
+> l <- list(asdfghj = 1:10)
+
+> l$a
+ [1]  1  2  3  4  5  6  7  8  9 10
+ 
+> l[["a"]]#列表中没有a这个元素
+NULL
+> l[["a",exact=FALSE]] #关掉精确匹配
+ [1]  1  2  3  4  5  6  7  8  9 10
+
+> x <- list(asdfghj=1:10, b=1:2, aaa=3:5)
+> x$a #返回null值，因为有两个名称在第一位重了，即使关闭精确匹配也不能看到
+NULL
+> x[["a",exact=FALSE]]
+NULL
+> x$as #通过不完全匹配
+ [1]  1  2  3  4  5  6  7  8  9 10
+
+ 
+ 
+ 
+ 
+# 加载数据集包
+> # 处理缺失值
+> x <- c(1,NA,2,NA,3)
+> is.na(x) 
+[1] FALSE  TRUE FALSE  TRUE FALSE
+> x[!is.na(x)] #去除掉缺失值
+[1] 1 2 3
+
+> x <- c(1,NA,2,NA,3)
+> y <- c("a","b",NA,"c",NA)
+> # 有两个向量都有缺失值，希望处理那两个向量都不是缺失值的数据。
+> z <- complete.cases(x,y)
+> z
+[1]  TRUE FALSE FALSE FALSE FALSE
+> x[z]
+[1] 1
+> y[z]
+[1] "a"
+
+
+> # 加载数据集
+> library(datasets)
+
+> head(airquality)
+  Ozone Solar.R Wind Temp Month Day
+1    41     190  7.4   67     5   1
+2    36     118  8.0   72     5   2
+3    12     149 12.6   74     5   3
+4    18     313 11.5   62     5   4
+5    NA      NA 14.3   56     5   5
+6    28      NA 14.9   66     5   6
+> g <- complete.cases(airquality)
+> g
+  [1]  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE FALSE  TRUE
+ [13]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+ [25] FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE
+ [37] FALSE  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE
+ [49]  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+ [61] FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
+ [73]  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE
+ [85]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
+ [97] FALSE FALSE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
+[109]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE FALSE  TRUE
+[121]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[133]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[145]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE
+> airquality[g,][1:10,]
+   Ozone Solar.R Wind Temp Month Day
+1     41     190  7.4   67     5   1
+2     36     118  8.0   72     5   2
+3     12     149 12.6   74     5   3
+4     18     313 11.5   62     5   4
+7     23     299  8.6   65     5   7
+8     19      99 13.8   59     5   8
+9      8      19 20.1   61     5   9
+12    16     256  9.7   69     5  12
+13    11     290  9.2   66     5  13
+14    14     274 10.9   68     5  14
+
+
+#向量化操作
+可以作用于向量，矩阵等结构，使得代码简洁，易于阅读，效率高。
+
+> # Vectorized
+> x <- 1:5
+> y <- 6:10
+> x+y
+[1]  7  9 11 13 15
+> x*y
+[1]  6 14 24 36 50
+> x/y
+[1] 0.1666667 0.2857143 0.3750000 0.4444444 0.5000000
+
+> x <- matrix(1:4,nrow=2,ncol=2)
+> y <- matrix(rep(2,4),nrow=2,ncol=2) #rep(2,4)就是将2重复4次
+> x*y   #对应的元素进行乘法或除法
+     [,1] [,2]
+[1,]    2    6
+[2,]    4    8
+> x/y
+     [,1] [,2]
+[1,]  0.5  1.5
+[2,]  1.0  2.0
+> 
+> 
+> # 矩阵乘
+> x %*% y
+     [,1] [,2]
+[1,]    8    8
+[2,]   12   12
+
+
+
+
+
+
+```
+
 
 </xmp>
 
