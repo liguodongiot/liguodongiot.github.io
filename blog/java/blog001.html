@@ -197,6 +197,14 @@ public class ParseAnnoMain {
 
 ```
 
+运行结果：
+
+`I have class double eyeColor.<--->wintfru<--->22`
+
+`I have method double eyeColor.<--->wintfru<--->22`
+
+`I have method double eyeColor.<--->wintfru<--->22`
+
 
 ###注解实战
 **需求：**
@@ -550,7 +558,15 @@ public class Main {
 }
 
 ```
+运行结果：
 
+`select * from user where 1=1 and id = 10`
+
+`select * from user where 1=1 and username = 'wintfru' and age = 22 and email in ( 'liguodong@163.com' )`
+
+`select * from user where 1=1 and email in ( 'liguodong@163.com', '66668888@qq.com', 'thinkpad@sina.com' )`
+
+`select * from department where 1=1 and name = '项目研发部' and amount = 10`
 
 **项目源码地址：**
 `https://github.com/liguodongIOT/JavaFrames/tree/master/AnnocationProject`
