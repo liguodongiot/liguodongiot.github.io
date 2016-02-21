@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Flume 1.6.0安装及案例测试</title>
+
+<xmp theme="Cerulean" style="display:none;">
+
+###安装Java（略）
+
+###**安装Flume**
+
+解压缩与重命名
+```
+tar -zxvf apache-flume-1.6.0-bin.tar.gz
+mv apache-flume-1.6.0-bin flume
+```
+
+修改 flume-env.sh 配置文件,主要是JAVA_HOME变量设置
+```
+cd flume/conf/
+
+cp flume-env.sh.template flume-env.sh
+
+vi flume-env.sh
+```
+
+
+验证是否安装成功
+```
+../bin/flume-ng version
+```
+
+###**案例1：Avro**
+
+Avro可以发送一个给定的文件给Flume，Avro 源使用AVRO RPC机制。
+
+1)创建agent配置文件`/liguodong/install/flume/conf/avro.conf`
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# Describe/configure the source
+a1.sources.r1.type = avro
+a1.sources.r1.channels = c1
+a1.sources.r1.bind = 0.0.0.0
+a1.sources.r1.port = 4141
+
+# Describe the sink
+a1.sinks.k1.type = logger
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sinkp to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+2)启动flume agent a1
+
+```
+# -c 后面指定conf位置
+# -f 后面指定具体的conf文件
+# -n 后面指定具体的agent名字
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/avro.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+
+3)创建指定文件
+
+```
+echo "hello world" > /liguodong/install/flume/tmp/test.log
+```
+
+4)使用avro-client发送文件
+
+```
+# -H 后面是主机名
+# -p 后面是端口号
+# -F 后面是日志文件
+/liguodong/install/flume/bin/flume-ng avro-client -c /liguodong/install/flume/conf -H 0.0.0.0 -p 4141 -F /liguodong/install/flume/tmp/test.log
+
+```
+
+控制台输出日志输出如下，则表明启动成功。
+```
+2016-02-18 02:34:37,198 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.source.AvroSource.start(AvroSource.java:228)] Starting Avro source r1: { bindAddress: 0.0.0.0, port: 4141 }...
+2016-02-18 02:34:37,462 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: r1: Successfully registered new MBean.
+2016-02-18 02:34:37,462 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: r1 started
+2016-02-18 02:34:37,463 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.source.AvroSource.start(AvroSource.java:253)] Avro source r1 started.
+2016-02-18 02:57:04,314 (New I/O server boss #1 ([id: 0x8ee6cf4c, /0:0:0:0:0:0:0:0:4141])) [INFO - org.apache.avro.ipc.NettyServer$NettyServerAvroHandler.handleUpstream(NettyServer.java:171)] [id: 0x479937e9, /127.0.0.1:39530 => /127.0.0.1:4141] OPEN
+2016-02-18 02:57:04,316 (New I/O  worker #1) [INFO - org.apache.avro.ipc.NettyServer$NettyServerAvroHandler.handleUpstream(NettyServer.java:171)] [id: 0x479937e9, /127.0.0.1:39530 => /127.0.0.1:4141] BOUND: /127.0.0.1:4141
+2016-02-18 02:57:04,316 (New I/O  worker #1) [INFO - org.apache.avro.ipc.NettyServer$NettyServerAvroHandler.handleUpstream(NettyServer.java:171)] [id: 0x479937e9, /127.0.0.1:39530 => /127.0.0.1:4141] CONNECTED: /127.0.0.1:39530
+2016-02-18 02:57:04,658 (New I/O  worker #1) [INFO - org.apache.avro.ipc.NettyServer$NettyServerAvroHandler.handleUpstream(NettyServer.java:171)] [id: 0x479937e9, /127.0.0.1:39530 :> /127.0.0.1:4141] DISCONNECTED
+2016-02-18 02:57:04,658 (New I/O  worker #1) [INFO - org.apache.avro.ipc.NettyServer$NettyServerAvroHandler.handleUpstream(NettyServer.java:171)] [id: 0x479937e9, /127.0.0.1:39530 :> /127.0.0.1:4141] UNBOUND
+2016-02-18 02:57:04,659 (New I/O  worker #1) [INFO - org.apache.avro.ipc.NettyServer$NettyServerAvroHandler.handleUpstream(NettyServer.java:171)] [id: 0x479937e9, /127.0.0.1:39530 :> /127.0.0.1:4141] CLOSED
+2016-02-18 02:57:04,659 (New I/O  worker #1) [INFO - org.apache.avro.ipc.NettyServer$NettyServerAvroHandler.channelClosed(NettyServer.java:209)] Connection to /127.0.0.1:39530 disconnected.
+2016-02-18 02:57:07,256 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 68 65 6C 6C 6F 20 77 6F 72 6C 64   hello world }
+```
+
+
+
+
+###**案例2：Spool**
+
+Spool监测配置的目录下新增的文件，并将文件中的数据读取出来。需要注意两点：
+1) 拷贝到spool目录下的文件不可以再打开编辑。
+2) spool目录下不可包含相应的子目录
+
+
+a)创建agent配置文件spool.conf
+
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# Describe/configure the source
+a1.sources.r1.type = spooldir
+a1.sources.r1.channels = c1
+a1.sources.r1.spoolDir = /liguodong/install/flume/logs
+a1.sources.r1.fileHeader = true
+
+# Describe the sink
+a1.sinks.k1.type = logger
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+
+```
+b)启动flume agent a1
+
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf/ -f /liguodong/install/flume/conf/spool.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+c)追加文件到/home/hadoop/flume-1.5.0-bin/logs目录
+```
+echo "spool test" > /liguodong/install/flume/logs/spool_text.log
+```
+
+d)在控制台，可以看到以下相关信息：
+```
+2016-02-18 03:53:43,629 (pool-3-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.readEvents(ReliableSpoolingFileEventReader.java:258)] Last read took us just up to a file boundary. Rolling to the next file, if there is one.
+2016-02-18 03:53:43,630 (pool-3-thread-1) [INFO - org.apache.flume.client.avro.ReliableSpoolingFileEventReader.rollCurrentFile(ReliableSpoolingFileEventReader.java:348)] Preparing to move file /liguodong/install/flume/logs/spool_text.log to /liguodong/install/flume/logs/spool_text.log.COMPLETED
+2016-02-18 03:53:47,615 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{file=/liguodong/install/flume/logs/spool_text.log} body: 73 70 6F 6F 6C 20 74 65 73 74                   spool test }
+```
+
+###**案例3：Exec**
+
+EXEC执行一个给定的命令获得输出的源,如果要使用tail命令，必选使得file足够大才能看到输出内容
+
+a)创建agent配置文件exec_tail.conf
+
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# Describe/configure the source
+a1.sources.r1.type = exec
+a1.sources.r1.channels = c1
+a1.sources.r1.command = tail -F /liguodong/install/flume/log_exec_tail
+
+# Describe the sink
+a1.sinks.k1.type = logger
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+b)启动flume agent a1
+
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/exec_tail.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+c)生成足够多的内容在文件里
+
+```
+for i in {1..100};do echo "exec tail $i" >> /liguodong/install/flume/log_exec_tail;echo $i;sleep 0.1;done
+```
+
+e)在控制台，可以看到以下信息：
+
+```
+2016-02-18 04:16:27,689 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 31                exec tail 1 }
+2016-02-18 04:16:27,821 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 32                exec tail 2 }
+2016-02-18 04:16:27,821 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 33                exec tail 3 }
+2016-02-18 04:16:27,822 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 34                exec tail 4 }
+2016-02-18 04:16:27,822 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 35                exec tail 5 }
+...
+...
+...
+2016-02-18 04:16:38,758 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 39 38             exec tail 98 }
+2016-02-18 04:16:38,758 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 39 39             exec tail 99 }
+2016-02-18 04:16:38,758 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{} body: 65 78 65 63 20 74 61 69 6C 20 31 30 30          exec tail 100 }
+```
+
+
+###**案例4：Syslogtcp**
+Syslogtcp监听TCP的端口做为数据源
+ 
+a)创建agent配置文件syslog_tcp.conf
+
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# Describe/configure the source
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 5140
+a1.sources.r1.host = localhost
+a1.sources.r1.channels = c1
+ 
+# Describe the sink
+a1.sinks.k1.type = logger
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+
+b)启动 flume agent a1
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/syslog_tcp.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+c)测试产生syslog
+```
+echo "hello idoall.org syslog" | nc localhost 5140
+```
+
+d)在控制台，可以看到以下信息：
+```
+2016-02-18 04:32:01,782 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.source.SyslogTcpSource.start(SyslogTcpSource.java:119)] Syslog TCP Source starting...
+2016-02-18 04:32:13,467 (New I/O  worker #1) [WARN - org.apache.flume.source.SyslogUtils.buildEvent(SyslogUtils.java:316)] Event created from Invalid Syslog data.
+2016-02-18 04:32:13,473 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 68 65 6C 6C 6F 20 69 64 6F 61 6C 6C 2E 6F 72 67 hello idoall.org }
+```
+
+
+
+
+
+
+
+###**案例5：JSONHandler**
+a)创建agent配置文件post_json.conf
+
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+ 
+# Describe/configure the source
+a1.sources.r1.type = org.apache.flume.source.http.HTTPSource
+a1.sources.r1.port = 8888
+a1.sources.r1.channels = c1
+ 
+# Describe the sink
+a1.sinks.k1.type = logger
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+b)启动flume agent a1
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/post_json.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+c)生成JSON 格式的POST request
+```
+curl -X POST -d '[{ "headers" :{"a" : "a1","b" : "b1"},"body" : "idoall.org_body"}]' http://localhost:8888
+```
+
+d)在m1的控制台，可以看到以下信息：
+```
+2016-02-18 04:39:05,324 (lifecycleSupervisor-1-0) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
+2016-02-18 04:39:05,361 (lifecycleSupervisor-1-0) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] jetty-6.1.26
+2016-02-18 04:39:05,427 (lifecycleSupervisor-1-0) [INFO - org.mortbay.log.Slf4jLog.info(Slf4jLog.java:67)] Started SelectChannelConnector@0.0.0.0:8888
+2016-02-18 04:39:05,428 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:120)] Monitored counter group for type: SOURCE, name: r1: Successfully registered new MBean.
+2016-02-18 04:39:05,428 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:96)] Component type: SOURCE, name: r1 started
+2016-02-18 04:39:43,317 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{b=b1, a=a1} body: 69 64 6F 61 6C 6C 2E 6F 72 67 5F 62 6F 64 79    idoall.org_body }
+```
+
+
+
+###**案例6：File Roll Sink**
+a)创建agent配置文件 file_roll.conf
+
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+ 
+# Describe/configure the source
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 5555
+a1.sources.r1.host = localhost
+a1.sources.r1.channels = c1
+ 
+# Describe the sink
+a1.sinks.k1.type = file_roll
+a1.sinks.k1.sink.directory = /liguodong/install/flume/logs
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+b)启动flume agent a1
+
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/file_roll.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+c)测试产生log
+
+```
+echo "hello idoall.org syslog" | nc localhost 5555
+echo "hello idoall.org syslog 2" | nc localhost 5555
+```
+
+d)查看/liguodong/install/flume/logs下是否生成文件,默认每30秒生成一个新文件
+```
+[root@localhost logs]# ll
+total 16
+-rw-r--r--. 1 root root   24 Feb 18 05:24 1455791059065-1
+-rw-r--r--. 1 root root   26 Feb 18 05:25 1455791059065-2
+-rw-r--r--. 1 root root    0 Feb 18 05:25 1455791059065-3
+-rw-r--r--. 1 root root    0 Feb 18 05:25 1455791059065-4
+-rw-r--r--. 1 root root 2128 Feb 18 02:50 flume.log.COMPLETED
+-rw-r--r--. 1 root root   11 Feb 18 03:53 spool_text.log.COMPLETED
+
+[root@localhost logs]# cat 1455791059065-1
+hello idoall.org syslog
+[root@localhost logs]# cat 1455791059065-2
+hello idoall.org syslog 2
+[root@localhost logs]# cat 1455791059065-3
+[root@localhost logs]# cat 1455791059065-4
+```
+
+
+
+###**案例7：Hadoop sink**
+
+a)创建agent配置文件hdfs_sink.conf
+
+```
+# Describe/configure the source
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 5140
+a1.sources.r1.host = localhost
+a1.sources.r1.channels = c1
+ 
+# Describe the sink
+a1.sinks.k1.type = hdfs
+a1.sinks.k1.channel = c1
+a1.sinks.k1.hdfs.path = hdfs://localhost:9000/flume/syslogtcp
+a1.sinks.k1.hdfs.filePrefix = Syslog
+a1.sinks.k1.hdfs.round = true
+a1.sinks.k1.hdfs.roundValue = 10
+a1.sinks.k1.hdfs.roundUnit = minute
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+b)启动flume agent a1
+
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/hdfs_sink.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+c)测试产生syslog
+```
+echo "hello idoall flume -> hadoop testing one" | nc localhost 5140
+```
+
+d)在控制台，可以看到以下信息：
+```
+2016-02-19 16:01:54,635 (New I/O  worker #1) [WARN - org.apache.flume.source.SyslogUtils.buildEvent(SyslogUtils.java:316)] Event created from Invalid Syslog data.
+2016-02-19 16:01:54,653 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.HDFSSequenceFile.configure(HDFSSequenceFile.java:63)] writeFormat = Writable, UseRawLocalFileSystem = false
+2016-02-19 16:01:55,050 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.hdfs.BucketWriter.open(BucketWriter.java:234)] Creating hdfs://localhost:9000/flume/syslogtcp/Syslog.1455868914645.tmp
+2016-02-19 16:01:55,424 (hdfs-k1-call-runner-0) [WARN - org.apache.hadoop.util.NativeCodeLoader.<clinit>(NativeCodeLoader.java:62)] Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2016-02-19 16:02:28,181 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.BucketWriter.close(BucketWriter.java:363)] Closing hdfs://localhost:9000/flume/syslogtcp/Syslog.1455868914645.tmp
+2016-02-19 16:02:28,250 (hdfs-k1-call-runner-4) [INFO - org.apache.flume.sink.hdfs.BucketWriter$8.call(BucketWriter.java:629)] Renaming hdfs://localhost:9000/flume/syslogtcp/Syslog.1455868914645.tmp to hdfs://localhost:9000/flume/syslogtcp/Syslog.1455868914645
+2016-02-19 16:02:28,269 (hdfs-k1-roll-timer-0) [INFO - org.apache.flume.sink.hdfs.HDFSEventSink$1.run(HDFSEventSink.java:394)] Writer callback called.
+```
+
+e)在localhost上再打开一个窗口，去hadoop上检查文件是否生成。
+
+```
+bin/hdfs dfs -ls /flume/s*
+Found 1 items
+-rw-r--r--   1 liguodong supergroup        155 2016-02-19 16:02 /flume/syslogtcp/Syslog.1455868914645
+
+bin/hdfs dfs -cat /flume/s*/Sys*
+SEQ!org.apache.hadoop.io.LongWritable"org.apache.hadoop.io.BytesWritableJ眑�!"�x;(�
+R����(hello idoall flume -> hadoop testing one
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+参考博文：
+`http://www.cnblogs.com/lion.net/p/3903197.html`
+
+
+</xmp>
+
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
