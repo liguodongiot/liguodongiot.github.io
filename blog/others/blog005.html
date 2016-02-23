@@ -441,15 +441,554 @@ SEQ!org.apache.hadoop.io.LongWritable"org.apache.hadoop.io.BytesWritableJ眑�
 R����(hello idoall flume -> hadoop testing one
 ```
 
+###**案例8：Replicating Channel Selector**
+
+Flume支持Fan out流从一个源到多个通道。有两种模式的Fan out，分别是复制和复用。
+在复制的情况下，流的事件被发送到所有的配置通道。
+在复用的情况下，事件被发送到可用的渠道中的一个子集。
+Fan out流需要指定源和Fan out通道的规则。
+
+这次我们需要用到m1,m2两台机器
+
+(
+m1 --> liguodong@192.168.101.10    ubuntu
+
+m2 --> root@192.168.101.56  hadoop
+)
+
+ 
+a)在m1创建replicating_Channel_Selector配置文件 replicating_Channel_Selector.conf
+```
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1 c2
+ 
+# Describe/configure the source
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 5140
+a1.sources.r1.host = localhost
+a1.sources.r1.channels = c1 c2
+a1.sources.r1.selector.type = replicating
+ 
+# Describe the sink
+a1.sinks.k1.type = avro
+a1.sinks.k1.channel = c1
+a1.sinks.k1.hostname = ubuntu
+a1.sinks.k1.port = 5555
+ 
+a1.sinks.k2.type = avro
+a1.sinks.k2.channel = c2
+a1.sinks.k2.hostname = hadoop
+a1.sinks.k2.port = 5555
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+```
+
+b)在m1创建replicating_Channel_Selector_avro配置文件 replicating_Channel_Selector_avro.conf
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+ 
+# Describe/configure the source
+a1.sources.r1.type = avro
+a1.sources.r1.channels = c1
+a1.sources.r1.bind = 0.0.0.0
+a1.sources.r1.port = 5555
+ 
+# Describe the sink
+a1.sinks.k1.type = logger
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+c)在m1上将2个配置文件复制到m2上一份
+
+```
+scp -r /liguodong/install/flume/conf/replicating_Channel_Selector.conf root@192.168.101.56:/liguodong/install/flume/conf/replicating_Channel_Selector.conf
+
+scp -r /liguodong/install/flume/conf/replicating_Channel_Selector_avro.conf root@192.168.101.56:/liguodong/install/flume/conf/replicating_Channel_Selector_avro.conf
+```
+
+d)打开4个窗口，在m1和m2上同时启动两个flume agent
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/replicating_Channel_Selector_avro.conf -n a1 -Dflume.root.logger=INFO,console
+
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/replicating_Channel_Selector.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+e)然后在m1或m2的任意一台机器上，测试产生syslog
+```
+echo "hello idoall.org syslog" | nc localhost 5140
+```
+
+f)在m1和m2的sink窗口，分别可以看到以下信息,这说明信息得到了同步：
+```
+2016-02-22 03:15:35,741 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 68 65 6C 6C 6F 20 69 64 6F 61 6C 6C 2E 6F 72 67 hello idoall.org }
+```
 
 
 
 
 
+###**案例9： Multiplexing Channel Selector**
+
+(
+m1 --> liguodong@192.168.101.10    ubuntu
+
+m2 --> root@192.168.101.56  hadoop
+)
+
+a)在m1创建Multiplexing_Channel_Selector配置文件 Multiplexing_Channel_Selector.conf
+```
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1 c2
+ 
+# Describe/configure the source
+a1.sources.r1.type = org.apache.flume.source.http.HTTPSource
+a1.sources.r1.port = 5140
+a1.sources.r1.channels = c1 c2
+a1.sources.r1.selector.type = multiplexing
+ 
+a1.sources.r1.selector.header = type
+#映射允许每个值通道可以重叠。默认值可以包含任意数量的通道。
+a1.sources.r1.selector.mapping.baidu = c1
+a1.sources.r1.selector.mapping.ali = c2
+a1.sources.r1.selector.default = c1
+ 
+# Describe the sink
+a1.sinks.k1.type = avro
+a1.sinks.k1.channel = c1
+a1.sinks.k1.hostname = ubuntu
+a1.sinks.k1.port = 5555
+ 
+a1.sinks.k2.type = avro
+a1.sinks.k2.channel = c2
+a1.sinks.k2.hostname = hadoop
+a1.sinks.k2.port = 5555
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+```
+b)在m1创建Multiplexing_Channel_Selector_avro配置文件 Multiplexing_Channel_Selector_avro.conf
+
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+ 
+# Describe/configure the source
+a1.sources.r1.type = avro
+a1.sources.r1.channels = c1
+a1.sources.r1.bind = 0.0.0.0
+a1.sources.r1.port = 5555
+ 
+# Describe the sink
+a1.sinks.k1.type = logger
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+c)将2个配置文件复制到m2上一份
+```
+scp -r /liguodong/install/flume/conf/Multiplexing_Channel_Selector.conf  root@192.168.101.56:/liguodong/install/flume/conf/Multiplexing_Channel_Selector.conf
+
+scp -r /liguodong/install/flume/conf/Multiplexing_Channel_Selector_avro.conf root@192.168.101.56:/liguodong/install/flume/conf/Multiplexing_Channel_Selector_avro.conf
+```
+
+d)打开4个窗口，在m1和m2上同时启动两个flume agent
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf/ -f /liguodong/install/flume/conf/Multiplexing_Channel_Selector_avro.conf -n a1 -Dflume.root.logger=INFO,console
+
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf/ -f /liguodong/install/flume/conf/Multiplexing_Channel_Selector.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+e)然后在m1或m2的任意一台机器上，测试产生syslog
+```
+curl -X POST -d '[{ "headers" :{"type" : "baidu"},"body" : "idoall_TEST1"}]' http://localhost:5140 && curl -X POST -d '[{ "headers" :{"type" : "ali"},"body" : "idoall_TEST2"}]' http://localhost:5140 && curl -X POST -d '[{ "headers" :{"type" : "qq"},"body" : "idoall_TEST3"}]' http://localhost:5140
+```
+
+f)在m1的sink窗口，可以看到以下信息：
+
+```
+2016-02-22 15:35:08,509 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{type=baidu} body: 69 64 6F 61 6C 6C 5F 54 45 53 54 31             idoall_TEST1 }
+2016-02-22 15:35:08,510 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{type=qq} body: 69 64 6F 61 6C 6C 5F 54 45 53 54 33             idoall_TEST3 }
+```
+
+g)在m2的sink窗口，可以看到以下信息：
+
+```
+2016-02-22 02:35:13,389 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{type=ali} body: 69 64 6F 61 6C 6C 5F 54 45 53 54 32             idoall_TEST2 }
+```
+可以看到，根据header中不同的条件分布到不同的channel上。
 
 
 
 
+
+ 
+###**案例10：Flume Sink Processors**
+
+failover的机器是一直发送给其中一个sink，当这个sink不可用的时候，自动发送到下一个sink。
+
+(
+m1 --> liguodong@192.168.101.10    ubuntu
+
+m2 --> root@192.168.101.56  hadoop
+)
+
+a)在m1创建Flume_Sink_Processors配置文件
+/liguodong/install/flume/conf/Flume_Sink_Processors.conf
+
+```
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1 c2
+ 
+#这个是配置failover的关键，需要有一个sink group
+a1.sinkgroups = g1
+a1.sinkgroups.g1.sinks = k1 k2
+#处理的类型是failover
+a1.sinkgroups.g1.processor.type = failover
+#优先级，数字越大优先级越高，每个sink的优先级必须不相同
+a1.sinkgroups.g1.processor.priority.k1 = 5
+a1.sinkgroups.g1.processor.priority.k2 = 10
+#设置为10秒，当然可以根据你的实际状况更改成更快或者很慢
+a1.sinkgroups.g1.processor.maxpenalty = 10000
+ 
+# Describe/configure the source
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 5140
+a1.sources.r1.channels = c1 c2
+a1.sources.r1.selector.type = replicating
+ 
+ 
+# Describe the sink
+a1.sinks.k1.type = avro
+a1.sinks.k1.channel = c1
+a1.sinks.k1.hostname = ubuntu
+a1.sinks.k1.port = 5555
+ 
+a1.sinks.k2.type = avro
+a1.sinks.k2.channel = c2
+a1.sinks.k2.hostname = hadoop
+a1.sinks.k2.port = 5555
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+```
+
+b)在m1创建Flume_Sink_Processors_avro配置文件
+/liguodong/install/flume/conf/Flume_Sink_Processors_avro.conf
+
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+ 
+# Describe/configure the source
+a1.sources.r1.type = avro
+a1.sources.r1.channels = c1
+a1.sources.r1.bind = 0.0.0.0
+a1.sources.r1.port = 5555
+ 
+# Describe the sink
+a1.sinks.k1.type = logger
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+c)将2个配置文件复制到m2上一份
+```
+scp -r /liguodong/install/flume/conf/Flume_Sink_Processors.conf  root@192.168.101.56:/liguodong/install/flume/conf/Flume_Sink_Processors.conf
+
+scp -r /liguodong/install/flume/conf/Flume_Sink_Processors_avro.conf root@192.168.101.56:/liguodong/install/flume/conf/Flume_Sink_Processors_avro.conf
+```
+
+d)打开4个窗口，在m1和m2上同时启动两个flume agent
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/Flume_Sink_Processors_avro.conf -n a1 -Dflume.root.logger=INFO,console
+
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/Flume_Sink_Processors.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+e)然后在m1或m2的任意一台机器上，测试产生log
+```
+echo "idoall.org test1 failover" | nc localhost 5140
+```
+
+f)因为m2的优先级高，所以在m2的sink窗口，可以看到以下信息，而m1没有：
+```
+2016-02-22 03:46:31,369 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 31 idoall.org test1 }
+```
+
+g)这时我们停止掉m2机器上的sink(ctrl+c)，再次输出测试数据：
+```
+echo "idoall.org test2 failover" | nc localhost 5140
+```
+
+h)可以在m1的sink窗口，看到读取到了刚才发送的两条测试数据：
+```
+2016-02-22 16:54:41,897 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 31 idoall.org test1 }
+2016-02-22 16:54:41,900 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 32 idoall.org test2 }
+```
+
+i)我们再在m2的sink窗口中，启动sink：
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/Flume_Sink_Processors_avro.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+j)输入两批测试数据：
+```
+echo "idoall.org test3 failover" | nc localhost 5140 && echo "idoall.org test4 failover" | nc localhost 5140
+```
+
+k)在m2的sink窗口，我们可以看到以下信息，因为优先级的关系，log消息会再次落到m2上：
+
+```
+2016-02-22 03:59:49,781 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 32 idoall.org test2 }
+2016-02-22 04:00:04,783 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 33 idoall.org test3 }
+2016-02-22 04:00:04,783 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 34 idoall.org test4 }
+```
+
+ 
+###**案例11：Load balancing Sink Processor**
+load balance type和failover不同的地方是， load balance有两个配置，一个是轮询，一个是随机。
+两种情况下如果被选择的sink不可用，就会自动尝试发送到下一个可用的sink上面。
+
+(
+m1 --> liguodong@192.168.101.10    ubuntu
+
+m2 --> root@192.168.101.56  hadoop
+)
+
+a)在m1创建 Load_balancing_Sink_Processors 配置文件
+/liguodong/install/flume/conf/Load_balancing_Sink_Processors.conf
+
+``` 
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1
+ 
+#这个是配置Load balancing的关键，需要有一个sink group
+a1.sinkgroups = g1
+a1.sinkgroups.g1.sinks = k1 k2
+a1.sinkgroups.g1.processor.type = load_balance
+a1.sinkgroups.g1.processor.backoff = true
+a1.sinkgroups.g1.processor.selector = round_robin
+ 
+# Describe/configure the source
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 5140
+a1.sources.r1.channels = c1
+ 
+# Describe the sink
+a1.sinks.k1.type = avro
+a1.sinks.k1.channel = c1
+a1.sinks.k1.hostname = ubuntu
+a1.sinks.k1.port = 5555
+ 
+a1.sinks.k2.type = avro
+a1.sinks.k2.channel = c1
+a1.sinks.k2.hostname = hadoop
+a1.sinks.k2.port = 5555
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+```
+
+b)在m1创建Load_balancing_Sink_Processors_avro配置文件
+/liguodong/install/flume/conf/Load_balancing_Sink_Processors_avro.conf
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+ 
+# Describe/configure the source
+a1.sources.r1.type = avro
+a1.sources.r1.channels = c1
+a1.sources.r1.bind = 0.0.0.0
+a1.sources.r1.port = 5555
+ 
+# Describe the sink
+a1.sinks.k1.type = logger
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+c)将2个配置文件复制到m2上一份
+```
+scp -r /liguodong/install/flume/conf/Load_balancing_Sink_Processors.conf  root@192.168.101.56:/liguodong/install/flume/conf/Load_balancing_Sink_Processors.conf
+
+scp -r /liguodong/install/flume/conf/Load_balancing_Sink_Processors_avro.conf root@192.168.101.56:/liguodong/install/flume/conf/Load_balancing_Sink_Processors_avro.conf
+```
+
+
+d)打开4个窗口，在m1和m2上同时启动两个flume agent
+```
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/Load_balancing_Sink_Processors_avro.conf -n a1 -Dflume.root.logger=INFO,console
+
+/liguodong/install/flume/bin/flume-ng agent -c /liguodong/install/flume/conf -f /liguodong/install/flume/conf/Load_balancing_Sink_Processors.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+e)然后在m1或m2的任意一台机器上，测试产生log，一行一行输入，输入太快，容易落到一台机器上
+```
+echo "idoall.org test1" | nc localhost 5140
+echo "idoall.org test2" | nc localhost 5140
+echo "idoall.org test3" | nc localhost 5140
+echo "idoall.org test4" | nc localhost 5140
+echo "idoall.org test5" | nc localhost 5140
+```
+
+f)在m1的sink窗口，可以看到以下信息：
+```
+2016-02-22 17:21:06,801 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 31 idoall.org test1 }
+2016-02-22 17:21:15,805 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 32 idoall.org test2 }
+2016-02-22 17:21:37,811 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 33 idoall.org test3 }
+2016-02-22 17:21:37,814 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 34 idoall.org test4 }
+```
+
+g)在m2的sink窗口，可以看到以下信息：
+```
+2016-02-22 04:21:43,319 (SinkRunner-PollingRunner-DefaultSinkProcessor) [INFO - org.apache.flume.sink.LoggerSink.process(LoggerSink.java:94)] Event: { headers:{Severity=0, flume.syslog.status=Invalid, Facility=0} body: 69 64 6F 61 6C 6C 2E 6F 72 67 20 74 65 73 74 35 idoall.org test5 }
+```
+
+说明轮询模式起到了作用。
+
+
+###**案例12：Hbase sink**
+ 
+a)在测试之前，将hbase启动。
+
+b)确保test_idoall_org表在hbase中已经存在。
+进入命令行`bin/hbase shell`
+
+```
+#查看表名
+list
+
+#创建表
+create 'test_idoall_org','name'
+
+#插入数据
+put 'test_idoall_org','10086','name:idoall','idoallvalue'
+
+#查看数据
+scan 'test_idoall_org'
+
+ROW                                                    COLUMN+CELL                                                                                                                                                     
+ROW                    COLUMN+CELL                                                   
+ 10086                 column=name:idoall, timestamp=1456213159108, value=idoallvalue
+1 row(s) in 0.0620 seconds
+
+``` 
+
+
+c)在m1创建hbase_simple配置文件
+/home/liguodong/flume/hbase_simple.conf
+```
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+ 
+# Describe/configure the source
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 5140
+a1.sources.r1.host = localhost
+a1.sources.r1.channels = c1
+ 
+# Describe the sink
+a1.sinks.k1.type = logger
+a1.sinks.k1.type = hbase
+a1.sinks.k1.table = test_idoall_org
+a1.sinks.k1.columnFamily = name
+a1.sinks.k1.column = idoall
+a1.sinks.k1.serializer =  org.apache.flume.sink.hbase.RegexHbaseEventSerializer
+a1.sinks.k1.channel = memoryChannel
+ 
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+ 
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
+
+e)启动flume agent
+```
+flume-ng agent -c /opt/cloudera/parcels/CDH-5.4.2-1.cdh5.4.2.p0.2/etc/flume-ng/conf.empty -f /home/liguodong/flume/hbase_simple.conf -n a1 -Dflume.root.logger=INFO,console
+```
+
+f)测试产生syslog
+```
+echo "hello idoall.org from flume" | nc localhost 5140
+```
+g)这时登录到hbase中，可以发现新数据已经插入
+
+```
+scan 'test_idoall_org'
+
+ROW                                          COLUMN+CELL                                                                                                                    
+ 10086                                       column=name:idoall, timestamp=1456213159108, value=idoallvalue                                                                 
+ 1456213398294-tsqNo7GB3e-0                  column=name:payload, timestamp=1456213401785, value=hello idoall.org from flume                                                
+2 row(s) in 0.0540 seconds
+
+#退出命令行
+quit
+
+```
 
 
 
