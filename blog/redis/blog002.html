@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Redis数据类型</title>
+
+<xmp theme="united" style="display:none;">
+
+###Strings类型及操作
+
+String是最简单的类型，一个Key对应一个Va1ue,string类型是二进制安全的。
+Redis的String可以包含任何数据，比如jpg图片或者序列化的对象。
+
+Set方法
+
+设置key对应的值为string类型的value
+
+例如：我们添加一个name=lijie的键值对。
+
+```
+[root@hadoop redis]# bin/redis-cli 
+127.0.0.1:6379> set name liguodong
+OK
+127.0.0.1:6379> get name
+"liguodong"
+```
+
+Setnx方法
+
+设置key对应的值为string类型的va1ue，如果
+key已经存在，返回0，nx是not exist的意思。如果不存在，则返回1。
+例如：我们添加一个name=lijie_new键值对。
+
+```
+127.0.0.1:6379> setnx name liguodong_new
+(integer) 0
+127.0.0.1:6379> get name
+"liguodong"
+```
+
+
+Setex
+
+设置key对应的值为string类型的va1ue，并指定此键值对应的有效期。
+例如：我们添加一个haircolor=red的键值对，并指定有效期为10秒。
+
+```
+127.0.0.1:6379> setex  haircolor 10 red
+OK
+127.0.0.1:6379> get haircolor
+"red"
+127.0.0.1:6379> get haircolor
+```
+
+
+Setrange
+
+设置指定key的va1ue值的子字符串
+例如：我们希望将lijie的126邮箱替换为gmail邮箱。
+
+```
+127.0.0.1:6379> get email
+"liguodong@163.com"
+127.0.0.1:6379> setrange email 10 gmail.com
+(integer) 19
+127.0.0.1:6379> get email
+"liguodong@gmail.com"
+
+```
+
+
+mset
+
+一次设置多个key的值，成功返回ok,表示所有的值都设置了;
+失败返回0,表示没有任何值被设置。
+
+```
+127.0.0.1:6379> mset username root password liguodong
+OK
+127.0.0.1:6379> get username
+"root"
+127.0.0.1:6379> get password
+"liguodong"
+```
+
+msetnx
+
+一次设置多个key的值，成功返回ok,表示所有的值都设置了，
+失败返回0,表示没有任何值被设置，但是不会覆盖已经存在的key。
+
+```
+127.0.0.1:6379> msetnx user xiaoming age 18 sex male
+(integer) 1
+127.0.0.1:6379> get user
+"xiaoming"
+127.0.0.1:6379> get age
+"18"
+127.0.0.1:6379> get sex
+"male"
+```
+
+getset
+
+设置key的值，并返回key的旧值。
+
+```
+127.0.0.1:6379> getset user xiaofang
+"xiaoming"
+```
+
+getrange
+
+获取key的value值的子字符串。
+getrange name 0 5
+
+```
+127.0.0.1:6379> getrange  email 0 8
+"liguodong"
+```
+
+mget
+
+一次获取多个key的值，如果对应key不存在,则对应返回nil。
+
+```
+127.0.0.1:6379> mget user age sex
+1) "xiaofang"
+2) "18"
+3) "male"
+```
+
+incr
+
+对key的值做加加操作，并返回新的值。key不存在时候会设
+置key，并认为原来的va1ue是0。
+
+incrby
+
+同incr类似，加指定值，key不存在时候会设
+置key，并认为原来的va1ue是0。
+```
+127.0.0.1:6379> incr age
+(integer) 19
+127.0.0.1:6379> incr age
+(integer) 20
+127.0.0.1:6379> incrby age 5
+(integer) 25
+
+```
+
+decr
+
+对key的值做减减操作。
+
+decrby
+
+同decr类似，减指定值。
+
+```
+127.0.0.1:6379> decr age
+(integer) 24
+127.0.0.1:6379> decr age
+(integer) 23
+127.0.0.1:6379> decrby age 3
+(integer) 20
+127.0.0.1:6379> decrby age -5
+(integer) 25
+```
+
+append
+
+给指定key的字符串追加value，返回新字符
+串值的长度。
+
+```
+127.0.0.1:6379> get name
+"liguodong"
+127.0.0.1:6379> append name @sina.com
+(integer) 18
+127.0.0.1:6379> get name
+"liguodong@sina.com"
+```
+
+strlen
+
+取指定key的va1ue值的长度。
+```
+127.0.0.1:6379> strlen name
+(integer) 18
+```
+
+###hashes类型
+
+hashes类型及操作
+
+Redis hash是一个string类型的field和value的映射。
+它的添加、删除操作都是O(1)(平均)。hash特别适合用于存储对象。
+相较于将对象的每个字段存成单个string类型。
+将一个对象存储在hash类型中会占用更少的内存；
+并且可以更方便的存取整个对象。
+
+
+hset
+
+设置hash field为指定值，如果key不存在，则先创建。
+
+127.0.0.1:6379> hset user:001 name liguodong
+(integer) 1
+127.0.0.1:6379> hget user:001 name
+"liguodong"
+
+
+hsetnx
+
+设置hash field为指定值，如果key不存在，则先创建。
+如果存在，返回0。
+```
+127.0.0.1:6379> hget user:002 name
+"coco"
+127.0.0.1:6379> hsetnx user:002 name koko
+(integer) 0
+127.0.0.1:6379> hget user:002 name
+"coco"
+```
+
+hmset
+
+同时设置hash的多个field。
+
+127.0.0.1:6379> hmset user:003 username liguodong passwd smd
+OK
+127.0.0.1:6379> hget user:003 username
+"liguodong"
+127.0.0.1:6379> hget user:003 passwd
+"smd"
+
+127.0.0.1:6379> hmget user:003 username passwd
+1) "liguodong"
+2) "smd"
+
+hincrby
+指定的hash field加上给定值。
+
+127.0.0.1:6379> hget user:003 age
+"110"
+127.0.0.1:6379> hincrby user:003 age 5
+(integer) 115
+
+
+hexists
+测试指定field是否存在。存在返回1，不存在返回0。
+
+hlen
+返回指定hash的field数量。
+
+
+127.0.0.1:6379> hexists user:003 age 
+(integer) 1
+127.0.0.1:6379> hlen  user:003 
+(integer) 3
+
+hdel
+删除指定hash的field。
+
+127.0.0.1:6379> hlen  user:003 
+(integer) 3
+127.0.0.1:6379> hdel user:003 age
+(integer) 1
+127.0.0.1:6379> hlen  user:003 
+(integer) 2
+
+
+hkeys
+返回hash的所有field。
+
+127.0.0.1:6379> hkeys user:003
+1) "username"
+2) "passwd"
+
+hvals
+返回hash的所有value。
+
+127.0.0.1:6379> hvals user:003
+1) "liguodong"
+2) "smd"
+
+hgetall
+获取某个hash中全部的field及value。
+
+127.0.0.1:6379> hgetall user:003
+1) "username"
+2) "liguodong"
+3) "passwd"
+4) "smd"
+
+
+
+
+###lists类型
+
+lists类型及操作
+List是一个链表结构，主要功能是push、pop、获取一个范围的所有值等等，
+操作中key理解为链表的名字。
+Redis的list类型其实就是一个每个子元素都是
+string类型的双向链表。
+我们可以通过push、pop操作从链表的头部或者尾部添加删除元素，这样list既
+可以作为栈，又可以作为队列。
+
+lpush
+在key对应list的头部添加字符串元素。
+
+
+
+```
+127.0.0.1:6379> lpush mylist "world"
+(integer) 1
+127.0.0.1:6379> lpush mylist "hello"
+(integer) 2
+127.0.0.1:6379> lpush mylist "liguodong"
+(integer) 3
+127.0.0.1:6379> lpush mylist "dear"
+(integer) 4
+
+#0表示从头的第一个元素，-1表示从尾的第一个元素。
+127.0.0.1:6379> lrange mylist 0 -1
+1) "dear"
+2) "liguodong"
+3) "hello"
+4) "world"
+```
+
+
+rpush
+在key对应list的尾部添加字符串元素。
+```
+127.0.0.1:6379> rpush list2 "I"
+(integer) 1
+127.0.0.1:6379> rpush list2 "Love"
+(integer) 2
+127.0.0.1:6379> rpush list2 "You"
+(integer) 3
+127.0.0.1:6379> lrange list2 0 -1
+1) "I"
+2) "Love"
+3) "You"
+
+```
+
+linsert
+在key对应list的特定位置前或后添加字符串
+```
+127.0.0.1:6379> rpush muma "one"
+(integer) 1
+127.0.0.1:6379> rpush muma "two"
+(integer) 2
+127.0.0.1:6379> rpush muma "three"
+(integer) 3
+127.0.0.1:6379> linsert muma before "two" "one2"
+(integer) 4
+127.0.0.1:6379> lrange muma 0 -1
+1) "one"
+2) "one2"
+3) "two"
+4) "three"
+
+```
+
+
+lset
+设置list中指定下标的元素值。
+
+```
+127.0.0.1:6379> rpush indexlist "gogogo"
+(integer) 1
+127.0.0.1:6379> rpush indexlist "oaoaoa"
+(integer) 2
+127.0.0.1:6379> lset indexlist 0 "baby"
+OK
+127.0.0.1:6379> lrange indexlist 0 -1
+1) "baby"
+2) "oaoaoa"
+
+```
+
+lrem
+从key对应liSt中删除n个和value相同的元素
+(n<0从尾删除，n=0全部删除)
+
+```
+127.0.0.1:6379> lrange dellist 0 -1
+1) "world"
+2) "hello"
+3) "hello"
+4) "hello"
+127.0.0.1:6379> lrem  dellist 2 "hello"
+(integer) 2
+127.0.0.1:6379> lrange dellist 0 -1
+1) "world"
+2) "hello"
+```
+
+
+ltrim
+保留指定key的值范围类的数据。
+```
+127.0.0.1:6379> lrange trimlist 0 -1
+1) "five"
+2) "four"
+3) "three"
+4) "two"
+5) "one"
+127.0.0.1:6379> ltrim trimlist 1 2
+OK
+127.0.0.1:6379> lrange trimlist 0 -1
+1) "four"
+2) "three"
+```
+
+lpop
+从list的头部删除元素，并返回删除元素。
+
+rpop
+从list的尾部删除元素，并返回删除元素。
+
+
+```
+127.0.0.1:6379> lrange poplist 0 -1
+1) "five"
+2) "four"
+3) "three"
+4) "two"
+5) "one"
+127.0.0.1:6379> lpop poplist
+"five"
+127.0.0.1:6379> lrange poplist 0 -1
+1) "four"
+2) "three"
+3) "two"
+4) "one"
+127.0.0.1:6379> rpop poplist
+"one"
+127.0.0.1:6379> lrange poplist 0 -1
+1) "four"
+2) "three"
+3) "two"
+
+```
+
+rpoplpush 
+从第一个list的尾部移除元素并添加到第二个list的头部。
+
+```
+127.0.0.1:6379> lrange poplist 0 -1
+1) "four"
+2) "three"
+3) "two"
+127.0.0.1:6379> lrange trimlist 0 -1
+1) "four"
+2) "three"
+127.0.0.1:6379> rpoplpush poplist trimlist
+"two"
+127.0.0.1:6379> lrange poplist 0 -1
+1) "four"
+2) "three"
+127.0.0.1:6379> lrange trimlist 0 -1
+1) "two"
+2) "four"
+3) "three"
+```
+
+lindex
+返回名称为key的list中index位置的元素。
+```
+127.0.0.1:6379> lrange trimlist 0 -1
+1) "two"
+2) "four"
+3) "three"
+127.0.0.1:6379> lindex trimlist 0
+"two"
+127.0.0.1:6379> lindex trimlist 3
+(nil)
+127.0.0.1:6379> lindex trimlist 2
+"three"
+
+```
+
+llen
+返回key对应list的长度
+```
+127.0.0.1:6379> llen trimlist 
+(integer) 3
+```
+
+
+###sets类型
+sets类型及操作
+Set是集合，它是String类型的无序集合。Set是通过
+hash table实现的，添加、删除和查找的复杂度都是
+0(1)。对集合我们可以取并集、交集、差集。通过这
+些操作我们可以实现sns中的好友推荐和b1og的tag功能。
+
+sadd 
+向名称为key的set中添加元素。
+
+```
+127.0.0.1:6379> sadd myset "hello"
+(integer) 1
+127.0.0.1:6379> sadd myset "world"
+(integer) 1
+127.0.0.1:6379> sadd myset "world"
+(integer) 0
+
+#查看元素
+127.0.0.1:6379> smembers myset
+1) "world"
+2) "hello"
+```
+srem
+删除名称为key的set中元素。
+```
+127.0.0.1:6379> srem myset "hello"
+(integer) 1
+127.0.0.1:6379> smembers myset
+1) "world"
+
+```
+
+
+spop
+随机返回并删除名称为key的set中一个元素。
+```
+127.0.0.1:6379> smembers myset
+1) "angle"
+2) "world"
+3) "baby"
+4) "anglelababy"
+127.0.0.1:6379> spop myset
+"baby"
+127.0.0.1:6379> smembers myset
+1) "angle"
+2) "world"
+3) "anglelababy"
+127.0.0.1:6379> spop myset
+"anglelababy"
+127.0.0.1:6379> smembers myset
+1) "angle"
+2) "world"
+
+```
+
+sdiff
+返回所有给定key与第一个key的差集
+ 
+```
+127.0.0.1:6379> smembers myset
+1) "bobo"
+2) "koko"
+3) "bbbb"
+4) "world"
+5) "angle"
+6) "coco"
+127.0.0.1:6379> smembers myset2
+1) "koko"
+2) "jjjj"
+3) "coco"
+127.0.0.1:6379> sdiff myset myset2
+1) "angle"
+2) "world"
+3) "bobo"
+4) "bbbb"
+127.0.0.1:6379> sdiff myset2 myset
+1) "jjjj"
+``` 
+
+
+sdiffstore
+返回所有给定key与第一个key的差集，
+并将结果存为另一个key。
+
+```
+127.0.0.1:6379> sdiffstore myset12 myset myset2
+(integer) 4
+127.0.0.1:6379> sdiffstore myset21 myset2 myset
+(integer) 1
+127.0.0.1:6379> smembers myset12
+1) "angle"
+2) "world"
+3) "bobo"
+4) "bbbb"
+127.0.0.1:6379> smembers myset21
+1) "jjjj"
+```
+
+sinter
+返回所有给定key的交集
+
+sinterstore 
+返回所有给定key的交集，并将
+结果存为另一个key。
+
+sunion
+并集
+
+sunionstore
+返回所有给定key的并集，并将
+结果存为另一个key。
+```
+127.0.0.1:6379> sunionstore myset3 myset2 myset
+(integer) 7
+127.0.0.1:6379> smembers myset3
+1) "bobo"
+2) "koko"
+3) "jjjj"
+4) "bbbb"
+5) "angle"
+6) "world"
+7) "coco"
+
+
+```
+
+
+
+smove
+从第一个key对应的set中移除member并添加到
+第二个对应的set中
+```
+127.0.0.1:6379> sadd myset4 yesyes
+(integer) 1
+127.0.0.1:6379> smove myset3 myset4 bbbb
+(integer) 1
+127.0.0.1:6379> smembers myset4
+1) "yesyes"
+2) "bbbb"
+
+```
+
+scard
+返回名称为key的set的元素个数。
+
+```
+127.0.0.1:6379> scard myset3
+(integer) 6
+
+```
+
+sismember
+测试member是否是名称为key的set的元素。
+
+```
+127.0.0.1:6379> sismember myset3 jjjj
+(integer) 1
+127.0.0.1:6379> sismember myset3 bbbb
+(integer) 0
+
+```
+
+srandmember
+随机返回名称为key的set的一个元素，但不删除元素。
+
+```
+127.0.0.1:6379> srandmember myset3
+"bobo"
+127.0.0.1:6379> srandmember myset3
+"coco"
+
+```
+
+###sorted sets类型
+sorted set是set的一个升级版本，它在set的基础上
+增加了一个顺序属性，这一属性在添加修改元素的时
+候可以指定，每次指定后，zset会自动重新按新的值
+调整顺序。可以理解为有两列的mysql表，一列存
+value，一列存顺序。操作中key理解为zset的名字。
+
+zadd
+向名称为key的zset中添加元素member,score
+用于排序。如果该元素存在，则更新其顺序。
+```
+127.0.0.1:6379> zadd myzset 1 one
+(integer) 1
+127.0.0.1:6379> zadd myzset 2 two
+(integer) 1
+127.0.0.1:6379> zadd myzset 3 two
+(integer) 0
+127.0.0.1:6379> zrange myzset 0 -1 withscores
+1) "one"
+2) "1"
+3) "two"
+4) "3"
+127.0.0.1:6379> zrange myzset 0 -1
+1) "one"
+2) "two"
+
+```
+
+zrem
+删除名称为key的zset中的元素member。
+
+
+```
+127.0.0.1:6379> zrem myzset two
+(integer) 1
+127.0.0.1:6379> zrange myzset 0 -1 withscores
+1) "one"
+2) "1"
+
+```
+zincrby
+
+如果在名称为key的zset中已经存在元素member，
+则该元素的score增加increment。
+否则向该集合中添加该元素，其score的值为increment。
+
+```
+127.0.0.1:6379> zincrby myzset 2 one
+"3"
+127.0.0.1:6379> zrange myzset 0 -1 withscores
+1) "one"
+2) "3"
+```
+
+zrank
+返回元素的索引值。
+```
+127.0.0.1:6379> zrange myzset2 0 -1 withscores
+1) "one"
+2) "1"
+3) "two"
+4) "2"
+5) "three"
+6) "3"
+7) "four"
+8) "4"
+127.0.0.1:6379> zrank myzset2 two
+(integer) 1
+127.0.0.1:6379> zrank myzset2 four
+(integer) 3
+
+```
+
+
+zrevrank
+返回元素降序的索引值。
+```
+127.0.0.1:6379> zrevrank myzset2 four
+(integer) 0
+127.0.0.1:6379> zrevrank myzset2 one
+(integer) 3
+```
+
+zrevrange
+返回名称为key的zset（按Score从大到小顺序）
+中的index从start到end的所有元素。
+
+```
+127.0.0.1:6379> zrevrange myzset2 0 -1 withscores
+1) "four"
+2) "4"
+3) "three"
+4) "3"
+5) "two"
+6) "2"
+7) "one"
+8) "1"
+```
+
+
+
+rangebyscore
+返回集合中给定区间的元素。
+```
+127.0.0.1:6379> zrange myzset2 0 -1 withscores
+1) "one"
+2) "1"
+3) "two"
+4) "2"
+5) "three"
+6) "3"
+7) "four"
+8) "4"
+
+127.0.0.1:6379> zrangebyscore myzset2 2 4 withscores
+1) "two"
+2) "2"
+3) "three"
+4) "3"
+5) "four"
+6) "4"
+```
+
+zcount 
+返回集合中给定区间的数量。
+```
+127.0.0.1:6379> zcount myzset2 2 4
+(integer) 3
+
+```
+
+zcard
+返回集合中所有元素的数量。
+```
+127.0.0.1:6379> zcard myzset2 
+(integer) 4
+
+```
+
+zremrangebyrank
+删除有序集合保存在key开始和结束的排序所有元素。
+无论是开始和结束都以0基础索引，其中0是得分最低的元素。
+这些索引可以是负数，在那里它们表明起始于具有最高得分的元素偏移。
+```
+127.0.0.1:6379> zrange myzset2 0 -1 withscores
+1) "one"
+2) "1"
+3) "two"
+4) "2"
+5) "three"
+6) "3"
+7) "four"
+8) "4"
+127.0.0.1:6379> zremrangebyrank myzset2 1 2
+(integer) 2
+```
+
+zremrangebyscore
+删除的有序集合保存在key的最小值和最大值(含)之间的分数的所有元素。
+```
+127.0.0.1:6379> zrange myzset2 0 -1 withscores
+1) "one"
+2) "1"
+3) "four"
+4) "4"
+127.0.0.1:6379> zremrangebyscore myzset2 1 2
+(integer) 1
+127.0.0.1:6379> zrange myzset2 0 -1 withscores
+1) "four"
+2) "4"
+
+```
+
+</xmp>
+
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

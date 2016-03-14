@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Kafka集群搭建</title>
+
+<xmp theme="Cerulean" style="display:none;">
+
+###解压缩
+`tar -zxvf kafka_2.10-0.8.2.2.tgz`
+
+###重命名
+`mv kafka_2.10-0.8.2.2 kafka`
+
+###修改配置文件
+修改服务器的config/server.properties。
+
+broker.id：标识当前的server在集群中的id，唯一，填数字（非负数）。
+
+host.name：当前server host name，唯一，填服务器IP。
+
+zookeeper.connect：连接zookeeper的集群。
+
+log.dirs：log的存储目录，记得创建对应的目录。
+
+
+```
+############################# Server Basics #############################
+
+# The id of the broker. This must be set to a unique integer for each broker.
+broker.id=0
+
+############################# Socket Server Settings #############################
+
+# The port the socket server listens on
+port=9092
+
+# Hostname the broker will bind to. If not set, the server will bind to all interfaces
+#host.name=localhost
+host.name=192.168.101.56
+
+
+# Hostname the broker will advertise to producers and consumers. If not set, it uses the
+# value for "host.name" if configured.  Otherwise, it will use the value returned from
+# java.net.InetAddress.getCanonicalHostName().
+#advertised.host.name=<hostname routable by clients>
+
+# The port to publish to ZooKeeper for clients to use. If this is not set,
+# it will publish the same port that the broker binds to.
+#advertised.port=<port accessible by clients>
+
+# The number of threads handling network requests
+num.network.threads=3
+ 
+# The number of threads doing disk I/O
+num.io.threads=8
+
+# The send buffer (SO_SNDBUF) used by the socket server
+socket.send.buffer.bytes=102400
+
+# The receive buffer (SO_RCVBUF) used by the socket server
+socket.receive.buffer.bytes=102400
+
+# The maximum size of a request that the socket server will accept (protection against OOM)
+socket.request.max.bytes=104857600
+
+
+############################# Log Basics #############################
+
+# A comma seperated list of directories under which to store log files
+log.dirs=/liguodong/install/tmp/kafka-logs
+
+# The default number of log partitions per topic. More partitions allow greater
+# parallelism for consumption, but this will also result in more files across
+# the brokers.
+# num.partitions=1
+num.partitions=2
+
+# The number of threads per data directory to be used for log recovery at startup and flushing at shutdown.
+# This value is recommended to be increased for installations with data dirs located in RAID array.
+num.recovery.threads.per.data.dir=1
+
+############################# Log Flush Policy #############################
+
+# Messages are immediately written to the filesystem but by default we only fsync() to sync
+# the OS cache lazily. The following configurations control the flush of data to disk. 
+# There are a few important trade-offs here:
+#    1. Durability: Unflushed data may be lost if you are not using replication.
+#    2. Latency: Very large flush intervals may lead to latency spikes when the flush does occur as there will be a lot of data to flush.
+#    3. Throughput: The flush is generally the most expensive operation, and a small flush interval may lead to exceessive seeks. 
+# The settings below allow one to configure the flush policy to flush data after a period of time or
+# every N messages (or both). This can be done globally and overridden on a per-topic basis.
+
+# The number of messages to accept before forcing a flush of data to disk
+#log.flush.interval.messages=10000
+
+# The maximum amount of time a message can sit in a log before we force a flush
+#log.flush.interval.ms=1000
+
+############################# Log Retention Policy #############################
+
+# The following configurations control the disposal of log segments. The policy can
+# be set to delete segments after a period of time, or after a given size has accumulated.
+# A segment will be deleted whenever *either* of these criteria are met. Deletion always happens
+# from the end of the log.
+
+# The minimum age of a log file to be eligible for deletion
+log.retention.hours=168
+
+# A size-based retention policy for logs. Segments are pruned from the log as long as the remaining
+# segments don't drop below log.retention.bytes.
+#log.retention.bytes=1073741824
+
+# The maximum size of a log segment file. When this size is reached a new log segment will be created.
+log.segment.bytes=1073741824
+
+# The interval at which log segments are checked to see if they can be deleted according 
+# to the retention policies
+log.retention.check.interval.ms=300000
+
+# By default the log cleaner is disabled and the log retention policy will default to just delete segments after their retention expires.
+# If log.cleaner.enable=true is set the cleaner will be enabled and individual logs can then be marked for log compaction.
+log.cleaner.enable=false
+
+############################# Zookeeper #############################
+
+# Zookeeper connection string (see zookeeper docs for details).
+# This is a comma separated host:port pairs, each corresponding to a zk
+# server. e.g. "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002".
+# You can also append an optional chroot string to the urls to specify the
+# root directory for all kafka znodes.
+# zookeeper.connect=localhost:2181
+zookeeper.connect=192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181
+
+
+# Timeout in ms for connecting to zookeeper
+zookeeper.connection.timeout.ms=6000
+```
+
+创建日志目录：`mkdir -p /liguodong/install/tmp/kafka-logs`
+
+
+通过"scp -r"把配置好的kafka目录copy到其他几台server上：
+
+eg:
+`scp -r kafka/ root@192.168.101.71:/liguodong/install/`
+
+
+修改每一台server的对应的配置文件：
+主要是修改其中的broker.id和host.name属性，都必须唯一。
+
+
+###启动集群
+
+zookeeper为独立安装，先启动zookeeper集群: `bin/zkServer.sh start`
+
+查看状态：`bin/zkServer.sh status`
+
+
+启动kafka集群,每台机器上执行命令：`nohup bin/kafka-server-start.sh config/server.properties &`
+
+
+
+创建topic：
+
+`bin/kafka-topics.sh --create --zookeeper 192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181 --replication-factor 3 --partitions 1 --topic mykafka`
+
+查看Topic：
+
+`bin/kafka-topics.sh --list --zookeeper 192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181`
+
+查看详细信息：
+
+`bin/kafka-topics.sh --describe --zookeeper 192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181`
+
+```
+Topic:mykafka	PartitionCount:1	ReplicationFactor:3	Configs:
+	Topic: mykafka	Partition: 0	Leader: 0	Replicas: 0,2,1	Isr: 0,2,1
+```
+leader：负责处理消息的读和写，leader是从所有节点中随机选择的.
+
+replicas：列出了所有的副本节点，不管节点是否在服务中.
+
+isr：是正在服务中的节点.
+
+
+**一台server发送消息：**
+
+`bin/kafka-console-producer.sh --broker-list 192.168.101.56:9092,192.168.101.10:9092,192.168.101.71:9092 --topic mykafka`
+
+
+**另一台server接收消息：**
+
+`bin/kafka-console-consumer.sh --zookeeper 192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181 --topic mykafka --from-beginning`
+
+
+###测试Kafka的容错能力
+
+```
+bin/kafka-topics.sh --describe --zookeeper 192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181
+
+Topic:mykafka	PartitionCount:1	ReplicationFactor:3	Configs:
+	Topic: mykafka	Partition: 0	Leader: 0	Replicas: 0,2,1	Isr: 0,2,1
+```
+
+Broker 0作为leader运行，现在我们kill掉它：  
+```
+[root@hadoop kafka]# jps
+15339 Jps
+12424 QuorumPeerMain
+12585 Kafka
+[root@hadoop kafka]# kill -9 12585
+```
+
+另外一个节点被选做了leader, node 0不再出现在 in-sync 副本列表中：
+```
+[root@hadoop kafka]# bin/kafka-topics.sh --describe --zookeeper 192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181
+Topic:mykafka	PartitionCount:1	ReplicationFactor:3	Configs:
+	Topic: mykafka	Partition: 0	Leader: 2	Replicas: 0,2,1	Isr: 2,1
+```
+	
+虽然最初负责续写消息的leader down掉了，但之前的消息还是可以消费的：	
+```
+[root@localhost kafka]# bin/kafka-console-consumer.sh --zookeeper 192.168.101.56:2181,192.168.101.10:2181,192.168.101.71:2181 --topic mykafka --from-beginning
+dsdsf
+liguodong ggg
+liguodong good
+kkkk
+```	
+	
+</xmp>
+
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

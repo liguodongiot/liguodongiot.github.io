@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Redis简介及安装</title>
+
+<xmp theme="united" style="display:none;">
+NoSQL介绍
+NoSQL是以key-value形式存储，和传统的关系型数据库不一样，
+不一定遵循传统数据库的一些基本要求，比如说遵循SQL标准、
+ACID属性、表结构等等，这类数据库主要有以下特点：
+非关系型的、分布式的、开源的、水平可扩展的。
+
+
+1. 处理超大量的数据
+
+2．运行在便宜的pC服务器集群上
+
+3．击碎了性能瓶颈
+
+
+**适用场景**
+
+1.对数据高并发读写
+
+2.对海量数据的搞效率存储和访问
+
+3.对数据的高可扩展性和高可用性
+
+###Redis的介绍
+
+Redis是一个开源的，先进的key-value存储。它通常被称为
+数据结构服务器，因为键可以包含字符串，哈希，链表，集
+合和有序集合。
+
+
+Redis是一个key-value存储系统。它支持存储的
+va1ue类型很多，包括string（字符串）、11st（链表）、
+set（集合）、zset（有序集合）。这些数据类型都支持
+push/pop、add/remove及取交集和并集及更丰富的操作,
+Redis支持各种不同方式的排序。为了保证效率
+数据都是缓存在内存中，它也可以周期性的把更新的
+数据写入磁盘或者把修改操作写入追加的记录文件。
+
+提供的API语言包括：C、C++、C#、Clojure
+Common Lisp、Erlang、Haskell、Java、Javascript、
+Lua、Objective-C、Perl、PHP、Python、Ruby
+Scala、Go、Tcl
+
+
+Redis使用场合
+
+目前全球最大的Redis用户是新浪微博，在新浪有
+200多台物理机，400多个端口正在运行着Redis，有
++4G的数据在Redis上来为微博用户提供服务。
+
+在新浪微博Redis的部署场景很多，大概分为如下
+的2种
+1．应用程序直接访问Redis数据库。
+
+2．应用程序直接访问Redis，只有当Redis访问失败时才访问MySQL。
+
+
+
+把大象装冰箱的过程:
+1.打开冰箱门
+2.把大象装进去
+3.把冰箱关上
+
+
+
+
+1．取最新N个数据的侧乍
+2．排行榜应用，取TOPN操作
+3．需要精确设定过期时间的应用
+4．计数器应用
+5. Uniq操作，获取某段时间所有数据排重值
+6．实时系统，反垃圾系统
+7. Pub/Sub构建实时消息系统
+8. 构建队列系统
+9．缓存
+
+
+###Redis的安装与部署
+
+####步骤1：
+编译
+
+```
+tar -zxvf redis-3.0.7.tar.gz
+mv redis-3.0.7 redis
+cd redis/
+make
+
+cd src && make install
+```
+步骤2：
+移动文件，便于管理。
+```
+#存放命令
+mkdir -p /liguodong/install/redis/bin
+
+#存放配置文件
+mkdir -p /liguodong/install/redis/etc
+
+mv /liguodong/install/redis/redis.conf /liguodong/install/redis/etc
+ 
+cd /liguodong/install/redis/src
+mv mkreleasehdr.sh redis-benchmark redis-check-aof redis-check-dump redis-cli redis-server /liguodong/install/redis/bin/
+```
+
+步骤3：
+启动Redis服务：
+`/liguodong/install/redis/bin/redis-server /liguodong/install/redis/etc/redis.conf`
+
+
+Redis服务器的默认连接端口是6379
+
+
+
+
+###Redis的配置
+
+```
+daemonize 如果需要在后台运行，把该项改为yes
+pidfile 配置多个pid的地址：默认在/var/run/redis.pid
+bind 绑定ip，设置后只接受来自该ip的请求
+port 监听端口，默认为6379
+timeout 设置客户端连接时的超时时间，单位为秒。
+loglevel 分为4级，debug、verbose、notice、warning
+logfile 配置log文件地址
+databases 设置数据库的个数，默认使用的数据库为0
+save 设置redis进行数据库镜像的频率
+rdbcompression 在进行镜像备份时，是否进行压缩
+Dbfilename 镜像备份文件的文件名
+Dir 数据库镜像备份的文件放置路径
+Slaveof 设置数据库为其他数据库的从数据库
+Masterauth 主数据库连接需要的密码验证
+Requirepass 设置登录时需要使用的密码
+Maxclients 限制同时连接的客户数量
+Maxmemory 设置reclis能够使用的最大内存
+Appendonly 开启append only模式
+Appendfsync 设置对appendonly.aof坟件同步的频率
+vm-enabled 是否开启虚拟内存支持
+vm-swap-file 设置虚拟内存的交换文件路径
+vm-max-memory 设置redis使用的最大物理内存大小
+vm-page-size 设置虚拟内存的页大小
+vm-pages 设置交换文件的总的page数最
+vm-max-threads 设置VMIO同时使用的线程数量
+Glueoutputbuf 把小的输出缓存存放在一起
+hash-max-zipmap-entries 设置hash的临界值
+Activerehashing 重新hash
+```
+
+```
+#设置为后台启动
+daemonize yes
+
+# 查看进程
+ps -ef | grep redis
+
+root      5926     1  0 06:19 ?        00:00:00 /liguodong/install/redis/bin/redis-server *:6379
+root      5938  1791  0 06:19 pts/0    00:00:00 grep --color=auto redis
+
+
+# 查看端口是否被占用
+netstat -tunpl | grep 6379
+
+tcp        0      0 0.0.0.0:6379            0.0.0.0:*               LISTEN      5926/redis-server * 
+tcp6       0      0 :::6379                 :::*                    LISTEN      5926/redis-server *
+
+
+
+#打开redis客户端
+./redis-cli
+
+#退出
+exit
+
+#关闭redis
+pkill redis-server
+./redis-cli shutdown
+```
+
+</xmp>
+
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
