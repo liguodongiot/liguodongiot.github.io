@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Redis高级特性</title>
+
+<xmp theme="united" style="display:none;">
+
+###安全性
+
+设置客户端连接后，进行任何其他指定前需要使用的密码。
+
+警告：因为redis速度相当快，所以在一台比较
+好的服务器下，一个外部的用户可以在一秒钟
+进行150k次的密码尝试，这意味着你需到指定
+非常非常强大的密码来防止暴力破解。
+
+设置密码，修改redis.conf
+```
+requirepass liguodong
+```
+
+
+授权登录
+```
+方式1：
+[root@hadoop redis]# redis-cli 
+127.0.0.1:6379> auth liguodong
+
+
+
+方式2：
+[root@hadoop redis]# redis-cli -a liguodong
+
+```
+
+
+###主从复制
+Redis主从复制配置和使用都非常简单。通过主从复
+制可以允许多个slave server拥有和master server相
+同的数据库副本。
+
+
+
+**特点：**
+1.Master可以拥有多个slave。
+
+2.多个slave可以连接同一个master外，还可以连接
+到其它slave。
+
+3.主从复制不会阻塞master，在同步数据时，
+master可以继续处理client请求。
+
+4.提高系统的伸缩性。
+
+**主从复制过程：**
+1.slave与master建立连接，发送sync同步命令。
+
+2.master会启动一个后台进程，将数据库快照保存
+到文件中，同时master主进程会开始收集新的写命
+令并缓存。
+
+3．后台完成保存后，就将此文件发送给slave。
+
+4.slave将此文件保存到硬盘上。
+
+**配置主从服务器：**
+配置slave服务器很简单，只需要在slave的配置文件
+中加入以下配置：
+```
+slaveof 192.168.101.56 6379 #指定master的ip和端口
+
+masterauth liguodong #这是主机的密码
+```
+
+
+**验证：**
+
+在命令行通过info命令判断主从机。
+
+并且主机进行修改，能够在从机获取到数据。  
+
+
+
+
+
+
+###事务处理
+
+
+Redis对事务的支持目前还比较简单。Redis只能保证
+一个Client发起的事务中的命令可以连续的执行，而
+中间不会插入其他client的命令。
+当一个client在一个连接中发出multi命令时，这个连接会进入一个事务
+上下文，该连接后续的命令不会立即执行，而是先放
+到一个队列中，当执行exec命令时，Redis会顺序的
+执行队列中的所有命令。
+
+```
+127.0.0.1:6379> set age 100
+OK
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> set age 10
+QUEUED
+127.0.0.1:6379> set age 20
+QUEUED
+127.0.0.1:6379> exec
+1) OK
+2) OK
+127.0.0.1:6379> get age
+"20"
+```
+
+
+**取消一个事务**
+
+discard
+
+
+**乐观锁复杂事务控制**
+
+watch命令会监视给定的key，当exec时候，如果监视
+的key从调用watch后发生过变化，则整个事务会失败。
+也可以调用watch多次监视多个key。这样就可以
+对指定的key加乐观锁了。注意watch的key是对整
+个连接有效的，事务也一样。如果连接断开，监视和事
+务都会被自动清除。当然了exec,discard,
+unwatch命令都会清除连接中的所有监视。
+
+**事务回滚**
+
+redis中一个事务中能够执行成功的语句并不会回滚。
+与传统的关系型数据库有区别。
+
+
+
+###持久化机制
+redis是一个支持持久化的内存数据库，也就是说redis
+需要经常将内存中的数据同步到硬盘来保证持久化。
+
+redis支持两种持久化方式：
+
+1.snapshotting(快照)也是默认方式
+
+2.Append-only file(缩写aof)的方式
+
+
+**snapshotting方式**
+
+快照是默认的持久化方式。这种方式是将内存中数据
+以快照的方式写入到默认的文件名为dump.rdb。可
+以通过配置二进制文件中设置自动做快照持久化的方
+式．我们可以配置redis在n秒内,如果超过m个key,修
+改就自动做快照。  
+```
+#900秒内，如果超过1个key被修改，则发起快照保存。
+save 900 1 
+
+#300秒内，如果超过10个key被修改，则发起快照保存。
+save 300 10
+
+save 60 10000
+```
+
+**aof方式**
+
+由于快照方式是在一定间隔时间做一次的，所以如果
+redis意外down掉的话，就会丢失最后一次快照后的
+所有修改。
+aof快照方式有更好的持久化性，是由于在使用aof
+时，redis会将每一个收到的写命令都通过write函数追
+加到文件中，当redis重启时会通过重新执行文件中保
+存的写命令来在内存中重建整个数据库的内容。
+
+当然由于os会在内核中缓存write做的修改，所以可能
+不是立即写到磁盘上．这样aof方式的持久化也还是有
+可能会丢失部分修改．
+可以通过配置文件告诉redis我们想要通过fsync函数强
+制os写入到磁盘的时机。
+
+```
+appendonly yes #启动aof持久化方式
+
+# appendfsync always #收到写命令就立即写到磁盘上。最慢，但是保证完全的持久化
+appendfsync everysec #每秒钟写入磁盘一次，在性能和持久化方面做了很好地折中
+# appendfsync on #完全依赖OS，性能最好，持久化没保证。
+
+
+```
+
+
+###发布订阅消息
+
+发布订阅（pub/sub）是一种消息通信模式，主要的目
+的是解除消息发布者和消息订阅者之间的耦合，
+Redis作为一个pub/sub的server，在订阅者和发布者之间
+起到了消息路由的功能。订阅者可以通过subscribe和
+psubscribe命令向redis server订阅自己感兴趣的消
+息类型，redis将信息类型称为通道（channel）。当发布
+者通过publish命令向redis server发送特定类型的信
+息时，订阅该信息类型的全部client都会收到此消息。
+
+---
+
+client1:
+
+![](image/b004p001.jpg)
+
+client2:
+
+![](image/b004p002.jpg)
+
+client3:
+
+![](image/b004p003.jpg)
+
+---
+
+###虚拟内存的使用
+
+
+Redis的虚拟内存与操作系统的虚拟内存不是一回事，
+但是思路和目的都是相同的。就是暂时把不经常访问
+的数据从内存交换到磁盘中，从而腾出宝贵的内存空
+间用于其他需要访问的数据。
+尤其是对于redis这样的内存数据库，内存总是不够用的。
+除了可以将数据分
+割到多个redis server外。另外能够提高数据库容量的
+办法就是使用虚拟内存把那些不经常访问的数据交换
+到磁盘上。 
+
+
+**配置：**
+```
+really-use-vm yes #确定使用虚拟内存
+
+vm-enabled yes #开启vm功能
+vm-swap-file /tmp/redis.swap #交换出来的value保存的文件路径
+vm-max-memory 1000000 #redis使用的最大内存上限
+vm-page-size 32 #每个页面的大小32字节
+vm-pages 134217728 #最多使用多少页面
+vm-max-threads 4 #用于执行value对象换入换出的工作线程数量
+```
+
+不过虚拟内存在redis2.4之后，已经弃用。
+
+</xmp>
+
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Redis常用命令</title>
+
+<xmp theme="united" style="display:none;">
+
+###键值相关的命令
+
+keys
+
+返回满足给定pattern的所有key
+用表达式*，代表取出所有的key。
+
+```
+keys *
+
+keys my*
+```
+
+exists
+
+确认一个key是否存在
+存在返回1，不存在返回0.
+
+```
+exists mylist2
+
+exists mylist20
+
+```
+
+
+del
+
+删除一个key。
+
+```
+del list2
+```
+
+expire
+
+设置一个key的过期时间。
+```
+127.0.0.1:6379> expire myset21 10
+(integer) 1
+
+#查看这个key还有多少秒过期，-2表示key已经过期。
+127.0.0.1:6379> ttl myset21
+(integer) 4
+127.0.0.1:6379> ttl myset21
+(integer) 0
+127.0.0.1:6379> ttl myset21
+(integer) -2
+
+```
+
+move
+
+将当前数据库中的key转移到其他数据库中。
+
+```
+#选择0号数据库
+127.0.0.1:6379> select 0
+OK
+127.0.0.1:6379> set age 30
+OK
+127.0.0.1:6379> get age
+"30"
+127.0.0.1:6379> move age 1
+(integer) 1
+127.0.0.1:6379> get age 
+(nil)
+
+#选择1号数据库
+127.0.0.1:6379> select 1
+OK
+127.0.0.1:6379[1]> get age 
+"30"
+
+```
+
+
+persist
+
+移除给定key的过期时间。
+```
+127.0.0.1:6379[1]> expire age 100
+(integer) 1
+127.0.0.1:6379[1]> ttl age
+(integer) 95
+127.0.0.1:6379[1]> persist age
+(integer) 1
+127.0.0.1:6379[1]> ttl age
+(integer) -1
+
+```
+
+
+randomkey
+
+随机返回key空间的一个key
+
+```
+127.0.0.1:6379> randomkey
+"poplist"
+127.0.0.1:6379> randomkey
+"user:001"
+127.0.0.1:6379> randomkey
+"dellist"
+```
+rename
+
+重命名key
+```
+127.0.0.1:6379[1]> keys *
+1) "age"
+127.0.0.1:6379[1]> rename age age_new
+OK
+127.0.0.1:6379[1]> keys *
+1) "age_new"
+
+```
+
+type
+
+返回值的类型
+```
+127.0.0.1:6379> type myzset
+zset
+127.0.0.1:6379> type myset
+set
+127.0.0.1:6379> type mylist
+list
+  
+```
+
+
+###服务器相关的命令
+ping
+
+测试连接是否存活
+
+```
+#表明连接
+127.0.0.1:6379> ping
+PONG
+```
+
+echo
+
+在命令行打印一些内容。
+
+```
+echo 10 
+
+echo liguodong
+
+```
+
+select 
+
+选择数据库。Redis数据库编号为0-15.我们可以选择一个任意数据库来进行
+数据的存取。
+
+exit/quit
+
+退出客户端连接。
+
+
+
+dbsize
+
+返回当前数据库中key的数目。
+
+info
+
+获取服务器的信息。
+
+
+config get
+
+实时传储收到的请求。
+```
+127.0.0.1:6379> config get dir
+1) "dir"
+2) "/liguodong/install/redis/bin"
+
+#获取全部参数配置值
+127.0.0.1:6379> config get *
+```
+
+
+flushdb
+
+删除当前选择数据库中的所有key
+
+
+flushall
+
+删除所有数据库中的所有key。
+
+
+
+
+</xmp>
+
+<script src="../../strapdown/v0.2/strapdown.js"></script>
+<!--<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>-->
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
